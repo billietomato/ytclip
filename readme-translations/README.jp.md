@@ -1,6 +1,6 @@
 # ytclip — 切り抜き翻訳お助けツール
 
-[English](README.md) | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | **[日本語](README.jp.md)**
+[English](../README.md) | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | **[日本語](README.jp.md)**
 
 
 YouTubeの配信アーカイブから、翻訳字幕付きのファンメイドVTuber切り抜きをAIで作れます。
@@ -119,7 +119,7 @@ YouTube URL
     │  リマップ済みSRT
     ▼
 ┌─────────────────────────┐
-│ Step 5: 翻訳             │  ytclip-4-translate-* (AI)
+│ Step 5: 翻訳             │  ytclip-4-translate/ytclip-4-translate-* (AI)
 └─────────────────────────┘
     │  翻訳済みSRT
     ▼
@@ -322,19 +322,19 @@ bun ytclip-3-remap-srt/scripts/remap_srt.ts \
 リマップ済み字幕をターゲット言語に翻訳して、推しの言葉をもっと多くの人に届けます。Claude Code（または使用中のAIエージェント）を開いて、以下のように依頼します:
 
 **日本語に翻訳:**
-> `~/my-video/transcript-en-remapped.srt` を `ytclip-4-translate-jp/references/jp-localization.md` のローカライズルールに従って日本語に翻訳してください。`~/my-video/transcript-jp-remapped.srt` として保存してください。
+> `~/my-video/transcript-en-remapped.srt` を `ytclip-4-translate/ytclip-4-translate-jp/references/jp-localization.md` のローカライズルールに従って日本語に翻訳してください。`~/my-video/transcript-jp-remapped.srt` として保存してください。
 
 **繁體中文（台湾）に翻訳:**
-> `~/my-video/transcript-en-remapped.srt` を繁體中文（台湾）に翻訳し、`ytclip-4-translate-zhtw/references/zh-tw-localization.md` のローカライズルールに従ってください。`~/my-video/transcript-zhtw-remapped.srt` として保存してください。
+> `~/my-video/transcript-en-remapped.srt` を繁體中文（台湾）に翻訳し、`ytclip-4-translate/ytclip-4-translate-zhtw/references/zh-tw-localization.md` のローカライズルールに従ってください。`~/my-video/transcript-zhtw-remapped.srt` として保存してください。
 
 **英語に翻訳:**
-> `~/my-video/transcript-ja-remapped.srt` を英語に翻訳し、`ytclip-4-translate-en/references/en-localization.md` のローカライズルールに従ってください。`~/my-video/transcript-en-remapped.srt` として保存してください。
+> `~/my-video/transcript-ja-remapped.srt` を英語に翻訳し、`ytclip-4-translate/ytclip-4-translate-en/references/en-localization.md` のローカライズルールに従ってください。`~/my-video/transcript-en-remapped.srt` として保存してください。
 
 **広東語（香港）に翻訳:**
-> `~/my-video/transcript-en-remapped.srt` を広東語（香港）に翻訳し、`ytclip-4-translate-zhhk/references/zhhk-localization.md` のローカライズルールに従ってください。`~/my-video/transcript-zhhk-remapped.srt` として保存してください。
+> `~/my-video/transcript-en-remapped.srt` を広東語（香港）に翻訳し、`ytclip-4-translate/ytclip-4-translate-zhhk/references/zhhk-localization.md` のローカライズルールに従ってください。`~/my-video/transcript-zhhk-remapped.srt` として保存してください。
 
 **简体中文に翻訳:**
-> `~/my-video/transcript-en-remapped.srt` を简体中文に翻訳し、`ytclip-4-translate-zhcn/references/zhcn-localization.md` のローカライズルールに従ってください。`~/my-video/transcript-zhcn-remapped.srt` として保存してください。
+> `~/my-video/transcript-en-remapped.srt` を简体中文に翻訳し、`ytclip-4-translate/ytclip-4-translate-zhcn/references/zhcn-localization.md` のローカライズルールに従ってください。`~/my-video/transcript-zhcn-remapped.srt` として保存してください。
 
 AIがSRTをそのまま読み込んで翻訳するので、ワークフローを軽く保てます。各言語パックには、界隈の言い回し、ネタ、コミュニティの温度感を扱うためのローカライズルールが入っています。
 
@@ -342,11 +342,11 @@ AIがSRTをそのまま読み込んで翻訳するので、ワークフローを
 
 | スキルフォルダ | ターゲット言語 | スタイル |
 |-------------|-----------------|-------|
-| `ytclip-4-translate-en` | English | 切り抜き向けの自然な英語 |
-| `ytclip-4-translate-zhtw` | 繁體中文 (台灣) | 台湾VTuber・烤肉コミュニティの語感 |
-| `ytclip-4-translate-zhhk` | 繁體中文 (香港) | 香港広東語の烤肉語感 |
-| `ytclip-4-translate-zhcn` | 简体中文 | 简中VTuber・ネットコミュニティの語感 |
-| `ytclip-4-translate-jp` | 日本語 | VTuber・配信界隈の日本語 |
+| `ytclip-4-translate/ytclip-4-translate-en` | English | 切り抜き向けの自然な英語 |
+| `ytclip-4-translate/ytclip-4-translate-zhtw` | 繁體中文 (台灣) | 台湾VTuber・烤肉コミュニティの語感 |
+| `ytclip-4-translate/ytclip-4-translate-zhhk` | 繁體中文 (香港) | 香港広東語の烤肉語感 |
+| `ytclip-4-translate/ytclip-4-translate-zhcn` | 简体中文 | 简中VTuber・ネットコミュニティの語感 |
+| `ytclip-4-translate/ytclip-4-translate-jp` | 日本語 | VTuber・配信界隈の日本語 |
 
 ## Step 6 — 字幕をインポートしてエクスポート
 
@@ -398,11 +398,11 @@ AIがSRTをそのまま読み込んで翻訳するので、ワークフローを
 ytclip-1-transcript/            YouTube字幕をSRTとして取得
 ytclip-2-highlight-moments/         AIで切り抜き向きの場面を評価 → Markdown
 ytclip-3-remap-srt/             字幕を編集済みカットに合わせてリマップ
-ytclip-4-translate-en/          AI翻訳 → 英語
-ytclip-4-translate-zhtw/        AI翻訳 → 繁體中文（台湾）
-ytclip-4-translate-zhhk/        AI翻訳 → 繁體中文（香港）
-ytclip-4-translate-zhcn/        AI翻訳 → 简体中文
-ytclip-4-translate-jp/          AI翻訳 → 日本語
+ytclip-4-translate/ytclip-4-translate-en/          AI翻訳 → 英語
+ytclip-4-translate/ytclip-4-translate-zhtw/        AI翻訳 → 繁體中文（台湾）
+ytclip-4-translate/ytclip-4-translate-zhhk/        AI翻訳 → 繁體中文（香港）
+ytclip-4-translate/ytclip-4-translate-zhcn/        AI翻訳 → 简体中文
+ytclip-4-translate/ytclip-4-translate-jp/          AI翻訳 → 日本語
 ```
 
 ## スコアリングの基準

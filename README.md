@@ -1,6 +1,6 @@
 # ytclip — Fansub Clipping Helper
 
-**[English](README.md)** | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | [日本語](README.jp.md)
+**[English](README.md)** | [繁體中文](readme-translations/README.zh-TW.md) | [简体中文](readme-translations/README.zh-CN.md) | [日本語](readme-translations/README.jp.md)
 
 
 Make fanmade VTuber clips from YouTube VODs with translated subtitles, powered by AI.
@@ -119,7 +119,7 @@ YouTube URL
     │  Remapped SRT
     ▼
 ┌─────────────────────────┐
-│ Step 5: Translate        │  ytclip-4-translate-* (AI)
+│ Step 5: Translate        │  ytclip-4-translate/ytclip-4-translate-* (AI)
 └─────────────────────────┘
     │  Translated SRT
     ▼
@@ -321,19 +321,19 @@ Your folder now looks like:
 Now translate the remapped subtitles into the language your audience needs. Open Claude Code (or your AI agent) and ask:
 
 **Translate to Traditional Chinese (Taiwan):**
-> Translate `~/my-video/transcript-en-remapped.srt` to zh-TW following the localization rules in `ytclip-4-translate-zhtw/references/zh-tw-localization.md`. Save as `~/my-video/transcript-zhtw-remapped.srt`.
+> Translate `~/my-video/transcript-en-remapped.srt` to zh-TW following the localization rules in `ytclip-4-translate/ytclip-4-translate-zhtw/references/zh-tw-localization.md`. Save as `~/my-video/transcript-zhtw-remapped.srt`.
 
 **Translate to English:**
-> Translate `~/my-video/transcript-ja-remapped.srt` to English following the localization rules in `ytclip-4-translate-en/references/en-localization.md`. Save as `~/my-video/transcript-en-remapped.srt`.
+> Translate `~/my-video/transcript-ja-remapped.srt` to English following the localization rules in `ytclip-4-translate/ytclip-4-translate-en/references/en-localization.md`. Save as `~/my-video/transcript-en-remapped.srt`.
 
 **Translate to Cantonese (Hong Kong):**
-> Translate `~/my-video/transcript-en-remapped.srt` to Cantonese following the localization rules in `ytclip-4-translate-zhhk/references/zhhk-localization.md`. Save as `~/my-video/transcript-zhhk-remapped.srt`.
+> Translate `~/my-video/transcript-en-remapped.srt` to Cantonese following the localization rules in `ytclip-4-translate/ytclip-4-translate-zhhk/references/zhhk-localization.md`. Save as `~/my-video/transcript-zhhk-remapped.srt`.
 
 **Translate to Simplified Chinese:**
-> Translate `~/my-video/transcript-en-remapped.srt` to zh-CN following the localization rules in `ytclip-4-translate-zhcn/references/zhcn-localization.md`. Save as `~/my-video/transcript-zhcn-remapped.srt`.
+> Translate `~/my-video/transcript-en-remapped.srt` to zh-CN following the localization rules in `ytclip-4-translate/ytclip-4-translate-zhcn/references/zhcn-localization.md`. Save as `~/my-video/transcript-zhcn-remapped.srt`.
 
 **Translate to Japanese:**
-> Translate `~/my-video/transcript-en-remapped.srt` to Japanese following the localization rules in `ytclip-4-translate-jp/references/jp-localization.md`. Save as `~/my-video/transcript-ja-remapped.srt`.
+> Translate `~/my-video/transcript-en-remapped.srt` to Japanese following the localization rules in `ytclip-4-translate/ytclip-4-translate-jp/references/jp-localization.md`. Save as `~/my-video/transcript-ja-remapped.srt`.
 
 The AI reads your SRT directly, so the workflow stays lightweight. Each language pack includes localization rules for fan terminology, in-jokes, and community tone.
 
@@ -341,11 +341,11 @@ The AI reads your SRT directly, so the workflow stays lightweight. Each language
 
 | Skill folder | Target language | Style |
 |-------------|-----------------|-------|
-| `ytclip-4-translate-en` | English | Fansub-ready conversational English |
-| `ytclip-4-translate-zhtw` | 繁體中文 (台灣) | Taiwan VTuber and fansub community tone |
-| `ytclip-4-translate-zhhk` | 繁體中文 (香港) | Hong Kong Cantonese fansub tone |
-| `ytclip-4-translate-zhcn` | 简体中文 | Mainland VTuber and internet community tone |
-| `ytclip-4-translate-jp` | 日本語 | VTuber and streaming community Japanese |
+| `ytclip-4-translate/ytclip-4-translate-en` | English | Fansub-ready conversational English |
+| `ytclip-4-translate/ytclip-4-translate-zhtw` | 繁體中文 (台灣) | Taiwan VTuber and fansub community tone |
+| `ytclip-4-translate/ytclip-4-translate-zhhk` | 繁體中文 (香港) | Hong Kong Cantonese fansub tone |
+| `ytclip-4-translate/ytclip-4-translate-zhcn` | 简体中文 | Mainland VTuber and internet community tone |
+| `ytclip-4-translate/ytclip-4-translate-jp` | 日本語 | VTuber and streaming community Japanese |
 
 ## Step 6 — Import Subtitles and Export
 
@@ -397,11 +397,11 @@ Export your video as usual. Burn subtitles in if the clip is ready to post, or k
 ytclip-1-transcript/            Pull YouTube subtitles as SRT
 ytclip-2-highlight-moments/         AI scoring for clip-worthy moments → Markdown
 ytclip-3-remap-srt/             Remap subtitles to edited cuts
-ytclip-4-translate-en/          AI translation → English
-ytclip-4-translate-zhtw/        AI translation → Traditional Chinese (Taiwan)
-ytclip-4-translate-zhhk/        AI translation → Cantonese (Hong Kong)
-ytclip-4-translate-zhcn/        AI translation → Simplified Chinese
-ytclip-4-translate-jp/          AI translation → Japanese
+ytclip-4-translate/ytclip-4-translate-en/          AI translation → English
+ytclip-4-translate/ytclip-4-translate-zhtw/        AI translation → Traditional Chinese (Taiwan)
+ytclip-4-translate/ytclip-4-translate-zhhk/        AI translation → Cantonese (Hong Kong)
+ytclip-4-translate/ytclip-4-translate-zhcn/        AI translation → Simplified Chinese
+ytclip-4-translate/ytclip-4-translate-jp/          AI translation → Japanese
 ```
 
 ## Scoring Reference

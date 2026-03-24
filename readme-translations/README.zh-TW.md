@@ -1,6 +1,6 @@
 # ytclip — 烤肉剪輯小幫手
 
-[English](README.md) | **[繁體中文](README.zh-TW.md)** | [简体中文](README.zh-CN.md) | [日本語](README.jp.md)
+[English](../README.md) | **[繁體中文](README.zh-TW.md)** | [简体中文](README.zh-CN.md) | [日本語](README.jp.md)
 
 
 用 AI 把 YouTube 直播錄影做成粉絲向 VTuber 烤肉精華，配上翻譯字幕。
@@ -119,7 +119,7 @@ YouTube 網址
     │  重新對齊的 SRT
     ▼
 ┌─────────────────────────┐
-│ 第 5 步：翻譯字幕        │  ytclip-4-translate-* (AI)
+│ 第 5 步：翻譯字幕        │  ytclip-4-translate/ytclip-4-translate-* (AI)
 └─────────────────────────┘
     │  翻譯後的 SRT
     ▼
@@ -321,19 +321,19 @@ bun ytclip-3-remap-srt/scripts/remap_srt.ts \
 現在把對齊好的字幕翻成目標語言，讓更多人看得懂推在說什麼。打開 Claude Code（或你慣用的 AI 代理）輸入：
 
 **翻譯成繁體中文（台灣）：**
-> 把 `~/my-video/transcript-en-remapped.srt` 翻譯成繁體中文（台灣），翻譯時請遵循 `ytclip-4-translate-zhtw/references/zh-tw-localization.md` 中的在地化規則。存檔為 `~/my-video/transcript-zhtw-remapped.srt`。
+> 把 `~/my-video/transcript-en-remapped.srt` 翻譯成繁體中文（台灣），翻譯時請遵循 `ytclip-4-translate/ytclip-4-translate-zhtw/references/zh-tw-localization.md` 中的在地化規則。存檔為 `~/my-video/transcript-zhtw-remapped.srt`。
 
 **翻譯成英文：**
-> 把 `~/my-video/transcript-ja-remapped.srt` 翻譯成英文，並遵循 `ytclip-4-translate-en/references/en-localization.md` 中的在地化規則。存檔為 `~/my-video/transcript-en-remapped.srt`。
+> 把 `~/my-video/transcript-ja-remapped.srt` 翻譯成英文，並遵循 `ytclip-4-translate/ytclip-4-translate-en/references/en-localization.md` 中的在地化規則。存檔為 `~/my-video/transcript-en-remapped.srt`。
 
 **翻譯成廣東話（香港）：**
-> 把 `~/my-video/transcript-en-remapped.srt` 翻譯成廣東話（香港），並遵循 `ytclip-4-translate-zhhk/references/zhhk-localization.md` 中的在地化規則。存檔為 `~/my-video/transcript-zhhk-remapped.srt`。
+> 把 `~/my-video/transcript-en-remapped.srt` 翻譯成廣東話（香港），並遵循 `ytclip-4-translate/ytclip-4-translate-zhhk/references/zhhk-localization.md` 中的在地化規則。存檔為 `~/my-video/transcript-zhhk-remapped.srt`。
 
 **翻譯成簡體中文：**
-> 把 `~/my-video/transcript-en-remapped.srt` 翻譯成簡體中文，並遵循 `ytclip-4-translate-zhcn/references/zhcn-localization.md` 中的在地化規則。存檔為 `~/my-video/transcript-zhcn-remapped.srt`。
+> 把 `~/my-video/transcript-en-remapped.srt` 翻譯成簡體中文，並遵循 `ytclip-4-translate/ytclip-4-translate-zhcn/references/zhcn-localization.md` 中的在地化規則。存檔為 `~/my-video/transcript-zhcn-remapped.srt`。
 
 **翻譯成日文：**
-> 把 `~/my-video/transcript-en-remapped.srt` 翻譯成日文，並遵循 `ytclip-4-translate-jp/references/jp-localization.md` 中的在地化規則。存檔為 `~/my-video/transcript-ja-remapped.srt`。
+> 把 `~/my-video/transcript-en-remapped.srt` 翻譯成日文，並遵循 `ytclip-4-translate/ytclip-4-translate-jp/references/jp-localization.md` 中的在地化規則。存檔為 `~/my-video/transcript-ja-remapped.srt`。
 
 AI 會直接讀取你的 SRT 檔案進行翻譯，整個流程可以維持得很輕。每個語言包都附上在地化規則，處理圈內用語、梗和社群語感。
 
@@ -341,11 +341,11 @@ AI 會直接讀取你的 SRT 檔案進行翻譯，整個流程可以維持得很
 
 | Skill 資料夾 | 目標語言 | 風格 |
 |--------------|----------|------|
-| `ytclip-4-translate-en` | English | 自然、適合烤肉的英文 |
-| `ytclip-4-translate-zhtw` | 繁體中文（台灣） | 台灣 VTuber／烤肉圈語感 |
-| `ytclip-4-translate-zhhk` | 繁體中文（香港） | 香港廣東話烤肉語感 |
-| `ytclip-4-translate-zhcn` | 简体中文 | 簡中 VTuber／網路社群語感 |
-| `ytclip-4-translate-jp` | 日本語 | VTuber／實況圈日文 |
+| `ytclip-4-translate/ytclip-4-translate-en` | English | 自然、適合烤肉的英文 |
+| `ytclip-4-translate/ytclip-4-translate-zhtw` | 繁體中文（台灣） | 台灣 VTuber／烤肉圈語感 |
+| `ytclip-4-translate/ytclip-4-translate-zhhk` | 繁體中文（香港） | 香港廣東話烤肉語感 |
+| `ytclip-4-translate/ytclip-4-translate-zhcn` | 简体中文 | 簡中 VTuber／網路社群語感 |
+| `ytclip-4-translate/ytclip-4-translate-jp` | 日本語 | VTuber／實況圈日文 |
 
 ## 第 6 步 — 匯入字幕並輸出成品
 
@@ -397,11 +397,11 @@ AI 會直接讀取你的 SRT 檔案進行翻譯，整個流程可以維持得很
 ytclip-1-transcript/            從 YouTube 抓字幕成 SRT
 ytclip-2-highlight-moments/         AI 評估值得剪的亮點 → Markdown
 ytclip-3-remap-srt/             把字幕重新對齊到剪好的片段
-ytclip-4-translate-en/          AI 翻譯 → 英文
-ytclip-4-translate-zhtw/        AI 翻譯 → 繁體中文（台灣）
-ytclip-4-translate-zhhk/        AI 翻譯 → 廣東話（香港）
-ytclip-4-translate-zhcn/        AI 翻譯 → 簡體中文
-ytclip-4-translate-jp/          AI 翻譯 → 日文
+ytclip-4-translate/ytclip-4-translate-en/          AI 翻譯 → 英文
+ytclip-4-translate/ytclip-4-translate-zhtw/        AI 翻譯 → 繁體中文（台灣）
+ytclip-4-translate/ytclip-4-translate-zhhk/        AI 翻譯 → 廣東話（香港）
+ytclip-4-translate/ytclip-4-translate-zhcn/        AI 翻譯 → 簡體中文
+ytclip-4-translate/ytclip-4-translate-jp/          AI 翻譯 → 日文
 ```
 
 ## 評分參考
