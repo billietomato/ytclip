@@ -5,7 +5,7 @@
 
 Make fanmade VTuber clips from YouTube VODs with translated subtitles, assisted by AI agent skills.
 
-This workflow helps you pull streams, spot the most interesting moments, edit faster, remap subtitles to your cut, and translate them for viewers in other languages, so your oshi's words can travel further with love, passion, and efficiency.
+This workflow helps you pull streams, spot the most interesting moments, edit faster, remap subtitles to your cut, translate them to Traditional Chinese, proofread for typos, and convert to Simplified Chinese — so your oshi's words can travel further with love, passion, and efficiency.
 
 ## What You'll Need
 
@@ -57,7 +57,7 @@ bun --version
 
 ### 3. Claude Code (AI agent for scoring & translation)
 
-Steps 2 and 5 use an AI agent to find interesting moments and handle translation. This README uses **Claude Code** as the example.
+Steps 2, 5, and 6 use an AI agent to find interesting moments, translate, and proofread subtitles. This README uses **Claude Code** as the example.
 
 1. **Create an Anthropic account** — Go to [claude.ai](https://claude.ai) and sign up
 2. **Subscription or API key** — To use AI models with Claude Code, you need an active subscription or an API key. Sonnet 4.6 is recommended.
@@ -70,7 +70,7 @@ Steps 2 and 5 use an AI agent to find interesting moments and handle translation
    claude
    ```
 
-> **Using a different AI agent?** If it can follow the `SKILL.md` files and reference docs used in Steps 2 and 5, it can do the same job.
+> **Using a different AI agent?** If it can follow the `SKILL.md` files and reference docs used in Steps 2, 5, and 6, it can do the same job.
 
 ### 4. A Video Editor
 
@@ -116,40 +116,50 @@ mkdir my-video
 YouTube URL
     │
     ▼
-┌───────────────────────────┐
-│ Step 0: Download VOD      │  yt-dlp
-└───────────────────────────┘
+┌───────────────────────────────┐
+│ Step 0: Download VOD          │  yt-dlp
+└───────────────────────────────┘
     │
     ▼
-┌───────────────────────────┐
-│ Step 1: Get transcript    │  ytclip-1-transcript
-└───────────────────────────┘
+┌───────────────────────────────┐
+│ Step 1: Get transcript        │  ytclip-1-transcript
+└───────────────────────────────┘
     │  SRT file
     ▼
-┌───────────────────────────┐
-│ Step 2: Find interesting  │  ytclip-2-highlight-moments (AI)
-│         moments           │
-└───────────────────────────┘
+┌───────────────────────────────┐
+│ Step 2: Find interesting      │  ytclip-2-highlight-moments (AI)
+│         moments               │
+└───────────────────────────────┘
     │  Markdown with timestamps
     ▼
-┌───────────────────────────┐
-│ Step 3: Edit clips        │  Your video editor
-└───────────────────────────┘
+┌───────────────────────────────┐
+│ Step 3: Edit clips            │  Your video editor
+└───────────────────────────────┘
     │  Edited timeline + XML export
     ▼
-┌───────────────────────────┐
-│ Step 4: Remap subtitles   │  ytclip-3-remap-srt
-└───────────────────────────┘
+┌───────────────────────────────┐
+│ Step 4: Remap subtitles       │  ytclip-3-remap-srt
+└───────────────────────────────┘
     │  Remapped SRT
     ▼
-┌───────────────────────────┐
-│ Step 5: Translate         │  ytclip-4-translate/ytclip-4-translate-* (AI)
-└───────────────────────────┘
-    │  Translated SRT
+┌───────────────────────────────┐
+│ Step 5: Translate EN → zh-TW  │  ytclip-4-translate-en-to-zhtw (AI)
+└───────────────────────────────┘
+    │  zh-TW SRT
     ▼
-┌───────────────────────────┐
-│ Step 6: Import & export   │  Your video editor
-└───────────────────────────┘
+┌───────────────────────────────┐
+│ Step 6: Proofread zh-TW       │  ytclip-5-proofread-zhtw (AI)
+└───────────────────────────────┘
+    │  Proofread SRT
+    ▼
+┌───────────────────────────────┐
+│ Step 7: Convert TC → SC       │  ytclip-6-convert-tc-to-sc
+└───────────────────────────────┘
+    │  zh-CN SRT
+    ▼
+┌───────────────────────────────┐
+│ Step 8: Import & export       │  Your video editor
+└───────────────────────────────┘
     │
     ▼
   Final video with subtitles
@@ -334,38 +344,51 @@ my-video/
   transcript-en-remapped.srt ← Subtitles matching your edit
 ```
 
-## Step 5 — Translate Subtitles (AI)
+## Step 5 — Translate Subtitles EN → zh-TW (AI)
 
-Now translate the remapped subtitles into the language your audience needs. Open Claude Code (or your AI agent) and ask:
+Translate the remapped English subtitles into Traditional Chinese (Taiwan). Open Claude Code (or your AI agent) and ask:
 
-**Translate to Traditional Chinese (Taiwan):**
-> Use ytclip-4-translate-zhtw skill. Translate `my-video/transcript-en-remapped.srt` to zh-TW following the localization rules in `ytclip-4-translate/ytclip-4-translate-zhtw/references/zh-tw-localization.md`. Save as `my-video/transcript-zhtw-remapped.srt`.
+> Use ytclip-4-translate-en-to-zhtw skill. Translate `my-video/transcript-en-remapped.srt` to zh-TW following the localization rules in `ytclip-4-translate-en-to-zhtw/references/zh-tw-localization.md`. Save as `my-video/transcript-zhtw-remapped.srt`.
 
-**Translate to English:**
-> Use ytclip-4-translate-en skill. Translate `my-video/transcript-ja-remapped.srt` to English following the localization rules in `ytclip-4-translate/ytclip-4-translate-en/references/en-localization.md`. Save as `my-video/transcript-en-remapped.srt`.
+The AI reads your SRT directly. The localization rules handle Taiwan fan terminology, in-jokes, and community tone.
 
-**Translate to Cantonese (Hong Kong):**
-> Use ytclip-4-translate-zhhk skill. Translate `my-video/transcript-en-remapped.srt` to Cantonese following the localization rules in `ytclip-4-translate/ytclip-4-translate-zhhk/references/zhhk-localization.md`. Save as `my-video/transcript-zhhk-remapped.srt`.
+Your folder now looks like:
+```
+my-video/
+  ...
+  transcript-en-remapped.srt       English subtitles aligned to your cut
+  transcript-zhtw-remapped.srt     Translated zh-TW subtitles
+```
 
-**Translate to Simplified Chinese:**
-> Use ytclip-4-translate-zhcn skill. Translate `my-video/transcript-en-remapped.srt` to zh-CN following the localization rules in `ytclip-4-translate/ytclip-4-translate-zhcn/references/zhcn-localization.md`. Save as `my-video/transcript-zhcn-remapped.srt`.
+## Step 6 — Proofread zh-TW Subtitles (AI)
 
-**Translate to Japanese:**
-> Use ytclip-4-translate-jp skill. Translate `my-video/transcript-en-remapped.srt` to Japanese following the localization rules in `ytclip-4-translate/ytclip-4-translate-jp/references/jp-localization.md`. Save as `my-video/transcript-ja-remapped.srt`.
+Have the AI proofread the translated zh-TW SRT for confirmed typos only — no style suggestions. Open Claude Code and ask:
 
-The AI reads your SRT directly, so the workflow stays lightweight. Each language pack includes localization rules for fan terminology, in-jokes, and community tone.
+> Use ytclip-5-proofread-zhtw skill. Proofread `my-video/transcript-zhtw-remapped.srt` and report only confirmed typos (wrong characters, garbled text, obvious mistakes).
 
-### Available translation targets
+The AI will report each typo with its SRT block number, the original line, and the correct text. If the file is clean, it will say so. Fix any reported typos manually in the SRT file.
 
-| Skill folder | Target language | Style |
-|-------------|-----------------|-------|
-| `ytclip-4-translate/ytclip-4-translate-en` | English | Fansub-ready conversational English |
-| `ytclip-4-translate/ytclip-4-translate-zhtw` | 繁體中文 (台灣) | Taiwan VTuber and fansub community tone |
-| `ytclip-4-translate/ytclip-4-translate-zhhk` | 繁體中文 (香港) | Hong Kong Cantonese fansub tone |
-| `ytclip-4-translate/ytclip-4-translate-zhcn` | 简体中文 | Mainland VTuber and internet community tone |
-| `ytclip-4-translate/ytclip-4-translate-jp` | 日本語 | VTuber and streaming community Japanese |
+## Step 7 — Convert Traditional Chinese to Simplified Chinese
 
-## Step 6 — Import Subtitles and Export
+Convert the proofread zh-TW subtitles to Simplified Chinese using a direct character conversion script (no AI):
+
+```bash
+bun ytclip-6-convert-tc-to-sc/scripts/convert.ts \
+  my-video/transcript-zhtw-remapped.srt \
+  -o my-video/transcript-zhcn-remapped.srt
+```
+
+> **Note:** This is a pure character conversion — it does NOT adapt terminology or phrasing for mainland usage. If you need mainland localization (e.g. changing 影片 to 视频), that requires a separate pass.
+
+Your folder now looks like:
+```
+my-video/
+  ...
+  transcript-zhtw-remapped.srt     Proofread zh-TW subtitles
+  transcript-zhcn-remapped.srt     Simplified Chinese subtitles
+```
+
+## Step 8 — Import Subtitles and Export
 
 ### Import the translated SRT
 
@@ -405,8 +428,9 @@ my-video/
   highlight-moments.md                 Ranked clip shortlist with timestamps
   export.xml                       Editor timeline export
   clip_manifest.json               Parsed cut timing data
-  transcript-en-remapped.srt       Subtitles aligned to your cut
-  transcript-zhtw-remapped.srt     Translated subtitles ready to import
+  transcript-en-remapped.srt       English subtitles aligned to your cut
+  transcript-zhtw-remapped.srt     Translated and proofread zh-TW subtitles
+  transcript-zhcn-remapped.srt     Simplified Chinese subtitles (TC→SC conversion)
 ```
 
 ## Project Structure
@@ -423,22 +447,13 @@ ytclip/
 │   └── scripts/
 │       ├── parse_cuts.ts
 │       └── remap_srt.ts
-├── ytclip-4-translate/                  AI subtitle translation (multi-language)
-│   ├── ytclip-4-translate-en/           → English
-│   │   ├── SKILL.md
-│   │   └── references/en-localization.md
-│   ├── ytclip-4-translate-zhtw/         → Traditional Chinese (Taiwan)
-│   │   ├── SKILL.md
-│   │   └── references/zh-tw-localization.md
-│   ├── ytclip-4-translate-zhhk/         → Cantonese (Hong Kong)
-│   │   ├── SKILL.md
-│   │   └── references/zhhk-localization.md
-│   ├── ytclip-4-translate-zhcn/         → Simplified Chinese
-│   │   ├── SKILL.md
-│   │   └── references/zhcn-localization.md
-│   └── ytclip-4-translate-jp/           → Japanese
-│       ├── SKILL.md
-│       └── references/jp-localization.md
+├── ytclip-4-translate-en-to-zhtw/       AI translate English subtitles → zh-TW
+│   ├── SKILL.md
+│   └── references/zh-tw-localization.md
+├── ytclip-5-proofread-zhtw/             AI proofread zh-TW subtitles for typos
+│   └── SKILL.md
+├── ytclip-6-convert-tc-to-sc/           Convert TC → SC (direct character conversion)
+│   └── scripts/convert.ts
 └── readme-translations/                 Localized README files
 ```
 

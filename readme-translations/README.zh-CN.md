@@ -5,7 +5,7 @@
 
 使用 AI Agent Skills 辅助，从 YouTube 直播录像剪出粉丝向 VTuber 烤肉切片，并配上翻译字幕。
 
-这套工作流可以帮你抓直播、找出有趣片段、加快剪辑流程、把字幕精准对齐到成片上，再翻译成其他语言，让推的话语带着爱、热情和效率传到更远的地方。
+这套工作流可以帮你抓直播、找出有趣片段、加快剪辑流程、把字幕精准对齐到成片上，翻译成繁体中文、校对错字、再转成简体中文，让推的话语带着爱、热情和效率传到更远的地方。
 
 ## 准备工作
 
@@ -57,7 +57,7 @@ bun --version
 
 ### 3. Claude Code（用于评分和翻译的 AI 代理）
 
-第 2 步和第 5 步会用到 AI 代理，帮你找出有趣片段并处理翻译。这份 README 以 Anthropic 的 **Claude Code** 为例。
+第 2 步、第 5 步和第 6 步会用到 AI 代理，帮你找出有趣片段、翻译和校对。这份 README 以 Anthropic 的 **Claude Code** 为例。
 
 1. **注册 Anthropic 账号** — 前往 [claude.ai](https://claude.ai) 注册
 2. **订阅计划或 API 密钥** — 使用 Claude Code 的 AI 模型需要有效订阅或 API 密钥，建议使用 Sonnet 4.6 模型。
@@ -70,7 +70,7 @@ bun --version
    claude
    ```
 
-> **使用其他 AI 代理？** 只要你的 AI 代理看得懂第 2 步和第 5 步用到的 `SKILL.md` 和参考文档，也能照样完成。
+> **使用其他 AI 代理？** 只要你的 AI 代理看得懂第 2 步、第 5 步和第 6 步用到的 `SKILL.md` 和参考文档，也能照样完成。
 
 ### 4. 视频编辑软件
 
@@ -116,39 +116,49 @@ mkdir my-video
 YouTube URL
     │
     ▼
-┌───────────────────────────┐
-│ 第 0 步：下载录像           │  yt-dlp
-└───────────────────────────┘
+┌───────────────────────────────┐
+│ 第 0 步：下载录像              │  yt-dlp
+└───────────────────────────────┘
     │
     ▼
-┌───────────────────────────┐
-│ 第 1 步：获取字幕           │  ytclip-1-transcript
-└───────────────────────────┘
+┌───────────────────────────────┐
+│ 第 1 步：获取字幕              │  ytclip-1-transcript
+└───────────────────────────────┘
     │  SRT 文件
     ▼
-┌───────────────────────────┐
-│ 第 2 步：找出有趣片段        │  ytclip-2-highlight-moments (AI)
-└───────────────────────────┘
+┌───────────────────────────────┐
+│ 第 2 步：找出有趣片段           │  ytclip-2-highlight-moments (AI)
+└───────────────────────────────┘
     │  带时间戳的 Markdown
     ▼
-┌───────────────────────────┐
-│ 第 3 步：剪辑切片           │  你的视频编辑软件
-└───────────────────────────┘
+┌───────────────────────────────┐
+│ 第 3 步：剪辑切片              │  你的视频编辑软件
+└───────────────────────────────┘
     │  剪辑后的时间轴 + XML 导出
     ▼
-┌───────────────────────────┐
-│ 第 4 步：重映射字幕         │  ytclip-3-remap-srt
-└───────────────────────────┘
+┌───────────────────────────────┐
+│ 第 4 步：重映射字幕             │  ytclip-3-remap-srt
+└───────────────────────────────┘
     │  重映射后的 SRT
     ▼
-┌───────────────────────────┐
-│ 第 5 步：翻译字幕           │  ytclip-4-translate/ytclip-4-translate-* (AI)
-└───────────────────────────┘
-    │  翻译后的 SRT
+┌───────────────────────────────┐
+│ 第 5 步：翻译 EN → zh-TW      │  ytclip-4-translate-en-to-zhtw (AI)
+└───────────────────────────────┘
+    │  繁体中文 SRT
     ▼
-┌───────────────────────────┐
-│ 第 6 步：导入并导出         │  你的视频编辑软件
-└───────────────────────────┘
+┌───────────────────────────────┐
+│ 第 6 步：校对繁中字幕           │  ytclip-5-proofread-zhtw (AI)
+└───────────────────────────────┘
+    │  校对后的 SRT
+    ▼
+┌───────────────────────────────┐
+│ 第 7 步：繁中转简中            │  ytclip-6-convert-tc-to-sc
+└───────────────────────────────┘
+    │  简体中文 SRT
+    ▼
+┌───────────────────────────────┐
+│ 第 8 步：导入并导出            │  你的视频编辑软件
+└───────────────────────────────┘
     │
     ▼
   带字幕的最终视频
@@ -333,38 +343,51 @@ my-video/
   transcript-en-remapped.srt ← 匹配剪辑后时间轴的字幕
 ```
 
-## 第 5 步 — 翻译字幕（AI）
+## 第 5 步 — 翻译字幕 EN → zh-TW（AI）
 
-现在把对齐好的字幕翻成目标语言，让更多人听懂推在说什么。打开 Claude Code（或你的 AI 代理），输入：
+把对齐好的英文字幕翻成繁体中文（台湾）。打开 Claude Code（或你的 AI 代理），输入：
 
-**翻译为简体中文：**
-> Use ytclip-4-translate-zhcn skill. 将 `my-video/transcript-en-remapped.srt` 按照 `ytclip-4-translate/ytclip-4-translate-zhcn/references/zhcn-localization.md` 中的本地化规则翻译为简体中文。保存为 `my-video/transcript-zhcn-remapped.srt`。
+> Use ytclip-4-translate-en-to-zhtw skill. 将 `my-video/transcript-en-remapped.srt` 翻译为繁体中文（台湾），并遵循 `ytclip-4-translate-en-to-zhtw/references/zh-tw-localization.md` 中的本地化规则。保存为 `my-video/transcript-zhtw-remapped.srt`。
 
-**翻译为繁体中文（台湾）：**
-> Use ytclip-4-translate-zhtw skill. 将 `my-video/transcript-en-remapped.srt` 翻译为繁体中文（台湾），并遵循 `ytclip-4-translate/ytclip-4-translate-zhtw/references/zh-tw-localization.md` 中的本地化规则。保存为 `my-video/transcript-zhtw-remapped.srt`。
+AI 会直接读取你的 SRT 文件来完成翻译，附带本地化规则处理台湾圈内用语、梗和社区语感。
 
-**翻译为英文：**
-> Use ytclip-4-translate-en skill. 将 `my-video/transcript-ja-remapped.srt` 翻译为英文，并遵循 `ytclip-4-translate/ytclip-4-translate-en/references/en-localization.md` 中的本地化规则。保存为 `my-video/transcript-en-remapped.srt`。
+现在你的文件夹长这样：
+```
+my-video/
+  ...
+  transcript-en-remapped.srt       对齐成片的英文字幕
+  transcript-zhtw-remapped.srt     翻译后的繁体中文字幕
+```
 
-**翻译为粤语（香港）：**
-> Use ytclip-4-translate-zhhk skill. 将 `my-video/transcript-en-remapped.srt` 翻译为粤语（香港），并遵循 `ytclip-4-translate/ytclip-4-translate-zhhk/references/zhhk-localization.md` 中的本地化规则。保存为 `my-video/transcript-zhhk-remapped.srt`。
+## 第 6 步 — 校对繁中字幕（AI）
 
-**翻译为日语：**
-> Use ytclip-4-translate-jp skill. 将 `my-video/transcript-en-remapped.srt` 翻译为日语，并遵循 `ytclip-4-translate/ytclip-4-translate-jp/references/jp-localization.md` 中的本地化规则。保存为 `my-video/transcript-ja-remapped.srt`。
+让 AI 校对翻译好的繁中 SRT，只抓真正的错字，不会给你风格建议。打开 Claude Code 输入：
 
-AI 会直接读取你的 SRT 文件来完成翻译，整个流程可以保持得很轻。每个语言包都附带本地化规则，处理圈内用语、梗和社区语感。
+> Use ytclip-5-proofread-zhtw skill. 校对 `my-video/transcript-zhtw-remapped.srt`，只列出确定的错字（错别字、乱码、明显打错的字）。
 
-### 可用的翻译目标
+AI 会报告每一条错字的 SRT 区块编号、原文和正确写法。如果没有错字，就会告诉你文件是干净的。校对完毕后，手动修正回 SRT 文件即可。
 
-| 技能文件夹 | 目标语言 | 风格 |
-|-------------|-----------------|-------|
-| `ytclip-4-translate/ytclip-4-translate-en` | English | 自然、适合烤肉的英文 |
-| `ytclip-4-translate/ytclip-4-translate-zhtw` | 繁體中文 (台灣) | 台湾 VTuber / 烤肉圈语感 |
-| `ytclip-4-translate/ytclip-4-translate-zhhk` | 繁體中文 (香港) | 香港粤语烤肉语感 |
-| `ytclip-4-translate/ytclip-4-translate-zhcn` | 简体中文 | 简中 VTuber / 网络社区语感 |
-| `ytclip-4-translate/ytclip-4-translate-jp` | 日本語 | VTuber / 直播圈日语 |
+## 第 7 步 — 繁中转简中
 
-## 第 6 步 — 导入字幕并导出成品
+把校对过的繁中字幕直接转成简体中文，不经 AI，纯字符转换：
+
+```bash
+bun ytclip-6-convert-tc-to-sc/scripts/convert.ts \
+  my-video/transcript-zhtw-remapped.srt \
+  -o my-video/transcript-zhcn-remapped.srt
+```
+
+> **注意：** 这只是字符对应转换，不会调整用语或语感。如果需要大陆本地化（例如把「影片」改成「视频」），需要另外处理。
+
+现在你的文件夹长这样：
+```
+my-video/
+  ...
+  transcript-zhtw-remapped.srt     校对过的繁体中文字幕
+  transcript-zhcn-remapped.srt     简体中文字幕
+```
+
+## 第 8 步 — 导入字幕并导出成品
 
 ### 导入翻译后的 SRT
 
@@ -404,8 +427,9 @@ my-video/
   highlight-moments.md                 排名后的精华候选片段
   export.xml                       剪辑时间轴导出
   clip_manifest.json               解析后的剪辑时间数据
-  transcript-en-remapped.srt       对齐成片的字幕
-  transcript-zhtw-remapped.srt     翻译完成、可直接导入的字幕
+  transcript-en-remapped.srt       对齐成片的英文字幕
+  transcript-zhtw-remapped.srt     翻译并校对过的繁体中文字幕
+  transcript-zhcn-remapped.srt     简体中文字幕（繁→简转换）
 ```
 
 ## 项目结构
@@ -422,22 +446,13 @@ ytclip/
 │   └── scripts/
 │       ├── parse_cuts.ts
 │       └── remap_srt.ts
-├── ytclip-4-translate/                  AI 翻译字幕（多语言）
-│   ├── ytclip-4-translate-en/           → English
-│   │   ├── SKILL.md
-│   │   └── references/en-localization.md
-│   ├── ytclip-4-translate-zhtw/         → 繁体中文（台湾）
-│   │   ├── SKILL.md
-│   │   └── references/zh-tw-localization.md
-│   ├── ytclip-4-translate-zhhk/         → 繁体中文（香港）
-│   │   ├── SKILL.md
-│   │   └── references/zhhk-localization.md
-│   ├── ytclip-4-translate-zhcn/         → 简体中文
-│   │   ├── SKILL.md
-│   │   └── references/zhcn-localization.md
-│   └── ytclip-4-translate-jp/           → 日本語
-│       ├── SKILL.md
-│       └── references/jp-localization.md
+├── ytclip-4-translate-en-to-zhtw/       AI 翻译英文字幕 → 繁体中文（台湾）
+│   ├── SKILL.md
+│   └── references/zh-tw-localization.md
+├── ytclip-5-proofread-zhtw/             AI 校对繁中字幕，抓错字
+│   └── SKILL.md
+├── ytclip-6-convert-tc-to-sc/           繁中转简中（纯字符转换）
+│   └── scripts/convert.ts
 └── readme-translations/                 其他语言的 README
 ```
 
