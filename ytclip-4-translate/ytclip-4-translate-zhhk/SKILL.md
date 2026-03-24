@@ -32,9 +32,9 @@ Key rules:
 - Game names and terms must use official HK/TW Traditional Chinese names or terms commonly used in HK gaming community
 - Use Cantonese particles naturally: 啦, 囉, 嘅, 咩, 㗎, 喎, 噃, 嘛
 - Specific slang mappings (see reference for full list):
-  - "fucking" → 屌 / 仆街
-  - "oh shit" and similar → 哎吔 / 死火
+  - "fucking" → 屌 (expression) / 撚 (between verb)
+  - "oh shit" and similar → 屌 / 仆街
   - "Oh" → 哦
-  - "Oh my god" → 我嘅天 / 天啊
+  - "Oh my god" → OMG
 
 Save the output as `<original-name>-zhhk.srt` next to the input file, or to a user-specified path.
