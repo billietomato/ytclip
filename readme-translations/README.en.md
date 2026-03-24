@@ -1,6 +1,6 @@
 # ytclip — Fansub Clipping Helper
 
-**[English](README.en.md)** | [繁體中文](../README.md) | [简体中文](README.zh-CN.md) | [日本語](README.jp.md)
+**[English](README.en.md)** | [繁體中文](../README.md) | [简体中文](README.zh-CN.md)
 
 
 Make fanmade VTuber clips from YouTube VODs with translated subtitles, assisted by AI agent skills.

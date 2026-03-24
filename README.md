@@ -1,6 +1,6 @@
 # ytclip — 烤肉剪輯小幫手
 
-[English](readme-translations/README.en.md) | **[繁體中文](README.md)** | [简体中文](readme-translations/README.zh-CN.md) | [日本語](readme-translations/README.jp.md)
+[English](readme-translations/README.en.md) | **[繁體中文](README.md)** | [简体中文](readme-translations/README.zh-CN.md)
 
 
 使用 AI Agent Skills 輔助，從 YouTube 直播錄影剪出粉絲向 VTuber 烤肉精華，配上翻譯字幕。
