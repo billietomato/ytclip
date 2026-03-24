@@ -175,7 +175,7 @@ Preprocess an SRT transcript into timestamped chunks for AI evaluation.
 Options:
   --chunk-size <sec>   Chunk duration in seconds (default: 300 = 5 min)
   --overlap <sec>      Overlap between chunks in seconds (default: 30)
-  --focus <csv>        Optional keywords for AI to prioritize (e.g. "muscle bar,nose bleed")
+  --focus <csv>        Optional keywords for AI to prioritize (e.g. "announcement, new outfit")
   -o, --output <path>  Save output to file (default: stdout)
   -h, --help           Show help`);
 }

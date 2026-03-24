@@ -37,9 +37,11 @@ For each hot zone, re-read the relevant chunk text carefully and evaluate:
 
 3. **Composite score** — Weighted sum:
    ```
-   score = funny×1.0 + story×0.85 + engagement×1.0 + community×0.7 +
+   score = funny×1.0 + story×0.85 + engagement×1.0 + community×0.95 +
            collab×0.85 + gaming×0.95 + clipability×0.95 - penalties
+           + crossCommunityBonus
    ```
+   **crossCommunityBonus** = +3.0 when community ≥ 5 AND collab ≥ 5. Moments that land in both dimensions get shared across multiple fan communities, giving them outsized reach.
 
 4. **Hook** — A punchy one-line attention trigger from the clip's opening.
 
@@ -164,7 +166,7 @@ If `focusKeywords` are present in chunks.json:
 
 - Give extra attention to moments matching these topics
 - They are a **tiebreaker**, not an override — a boring moment matching a keyword should NOT beat a genuinely viral moment
-- Understand the keywords semantically — "muscle bar" means look for moments about that specific topic, not just the exact string
+- Understand the keywords semantically — look for moments about that specific topic, not just the exact string
 
 ## Output Format
 
