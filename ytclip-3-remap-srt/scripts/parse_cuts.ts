@@ -114,8 +114,12 @@ function parseSequence(xml: string, trackIndex: number): ClipManifest {
   }
 
   for (const sequenceBlock of sequenceBlocks) {
-    // Strip <file> blocks to avoid nested <media>/<video> tags confusing extraction
-    const cleaned = sequenceBlock.replace(/<file\b[^>]*>[\s\S]*?<\/file>/gi, "");
+    // Strip <file> blocks to avoid nested <media>/<video> tags confusing extraction.
+    // Self-closing <file .../> tags must be removed first; otherwise the non-greedy
+    // full-block regex treats them as an opening tag and swallows subsequent clipitems.
+    const cleaned = sequenceBlock
+      .replace(/<file\b[^>]*\/>/gi, "")
+      .replace(/<file\b[^>]*>[\s\S]*?<\/file>/gi, "");
     const mediaBlock = extractTag(cleaned, "media") || "";
     const videoBlock = extractTag(mediaBlock, "video") || "";
     if (!videoBlock) continue;
