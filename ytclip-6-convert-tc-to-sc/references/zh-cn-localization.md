@@ -24,7 +24,7 @@ The zh-TW translation uses Taiwan-specific slang. Convert to natural mainland eq
 
 | zh-TW | zh-CN | Notes |
 |-------|-------|-------|
-| 他喵的 / 喵的 | 卧槽 / 我靠 / 草 | "fucking" as intensifier |
+| 他喵的 / 喵的 | 他喵的 / 喵的 | Keep as-is — shared internet slang, do not convert |
 | 靠 / 喔靠 | 我靠 / 卧槽 / 我去 | "oh shit" / surprise |
 | 喔 | 哦 / 噢 | Casual "oh" |
 | 喔天啊 / 我的天啊 / 天啊 / 天哪 | 我的天 / 天呐 / 我滴天 | "oh my god" |
