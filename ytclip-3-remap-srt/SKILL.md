@@ -52,6 +52,18 @@ ${BUN_X} {baseDir}/scripts/parse_cuts.ts <export.xml> --track 0 -o clip_manifest
 ${BUN_X} {baseDir}/scripts/remap_srt.ts <transcript.srt> <clip_manifest.json> -o <output.srt> --gap 50
 ```
 
+### 3. Review gaps
+
+After remapping, check the clip manifest for gaps in the sequence timeline (where `sequenceOut` of clip N does not equal `sequenceIn` of clip N+1, with a tolerance of >1 second).
+
+Report any gaps to the user:
+```
+Gap detected: 35.6s – 54.8s (19.2s) — no transcript content for this section.
+You may need to add subtitles manually for this part of the video.
+```
+
+This helps the user identify sections of the edited video where the source transcript has no coverage (e.g., inserted media, B-roll, or segments where the original audio was unclear).
+
 ## Notes
 
 - Cues outside kept clips are dropped
