@@ -13,7 +13,7 @@ Translate/localize the FULL SRT script into natural Traditional Chinese used by 
 - Keep original meaning and factual claims; do not invent new facts.
 - Keep speaker intent and tone.
 - Do not summarize; output complete transcript.
-- Do not add comma (，) or full-stop (。) at the end of each subtitle line.
+- Do not mechanically append sentence-final `，` or `。` to every subtitle line.
 - Keep people names in original language (do not transliterate).
 - Game names, game terms, and character names must use official terms or words commonly used in Taiwan local community.
 - Keep proper nouns (product names, channels) accurate.
@@ -31,6 +31,20 @@ Translate/localize the FULL SRT script into natural Traditional Chinese used by 
 - Use `⋯` (U+22EF or U+2026) to indicate trailing off, hesitation, or an unfinished thought.
 - Do not use `...` or `…` — use `⋯` consistently.
 - Example: "I didn't really—" → "我其實沒有⋯"
+
+## Subtitle Punctuation Style
+
+- Treat subtitle punctuation as **light but present**. The target style is not "zero punctuation."
+- Use internal `，` when it helps spoken rhythm: clause turns, direct address, quoted-speech lead-ins, self-corrections, and "喔對 / 我說 / 天啊 / 等等" style pivots.
+- Good patterns:
+  - `喔對，讓我⋯`
+  - `我說，如果你們想要的話`
+  - `天啊，超大聲的`
+- Default to **no sentence-final `。`** on ordinary subtitle lines. Most lines should end bare or with `⋯` when the thought trails off.
+- Use sentence-final `？` only for genuine questions or rhetorical questions the speaker is audibly asking.
+- Use sentence-final `！` sparingly. Prefer tone from wording first; use `！` only when the source is clearly shouted or emphatically exclaimed.
+- `～` is allowed, but only for stretched reactions/interjections such as `耶～` or `靠～`. Do not scatter it everywhere.
+- If punctuation starts doing too much work, split the subtitle into shorter blocks instead of stuffing multiple beats into one line.
 
 ## Slang & Exclamation Mapping
 

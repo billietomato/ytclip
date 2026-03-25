@@ -55,7 +55,10 @@ Do not load those genre-specific references for unrelated content.
 Key rules:
 - Taiwan Traditional Chinese, not mainland Chinese
 - Colloquial internet/community language, preserve speaker tone
-- Do not add comma (，) or full-stop (。) at the end of each subtitle line
+- Use subtitle punctuation naturally inside the line; do not misread subtitle style as "no punctuation at all"
+- Do not mechanically add sentence-final `，` or `。` to every subtitle line
+- Prefer light punctuation: internal `，` for natural clause turns, `？` for real questions, `⋯` for trailing off, `～` only for stretched reactions/interjections
+- Default to no sentence-final `。`; only use it for a deliberate hard beat when it clearly improves rhythm
 - Do not add speaker markers (>> or labels)
 - Remove English filler words (Uh, Um, Like, You know) instead of translating them
 - Use `⋯` for pauses and trailing off
