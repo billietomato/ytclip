@@ -71,6 +71,10 @@ These are guidelines — adapt naturally to context. Do not force-fit if the ton
 - Always use the official Traditional Chinese name for games (e.g., 艾爾登法環 not 老頭環).
 - For game-specific terms (skills, items, locations, character names), use the terms commonly used in Taiwan gaming community. If no official TW translation exists, use the term the TW community commonly uses.
 - If unsure, keep the original English term rather than guessing a translation.
+- Genre-specific references:
+  - For FPS / battle royale / hero shooter content, also read `references/zh-tw-fps-terms.md`
+  - For fighting game / FGC / frame-data / matchup content, also read `references/zh-tw-fighting-game-terms.md`
+- Only load those genre references when the source content clearly matches. Do not let FPS or fighting-game jargon bleed into unrelated content.
 
 ## Tone Adaptation
 

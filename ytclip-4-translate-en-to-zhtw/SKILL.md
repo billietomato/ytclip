@@ -10,6 +10,8 @@ Translate SRT subtitle files from English to Traditional Chinese using Taiwan co
 ## References
 
 - `references/zh-tw-localization.md`: Complete localization rules, slang mapping, and style guidelines for Taiwan Traditional Chinese.
+- `references/zh-tw-fps-terms.md`: Read only when the content is clearly FPS, battle royale, or hero shooter related.
+- `references/zh-tw-fighting-game-terms.md`: Read only when the content is clearly fighting game / FGC related.
 
 ## Input
 
@@ -38,6 +40,12 @@ Proceed only after the user confirms the glossary. If the user says to skip, pro
 ### Step 2: Chunked Translation
 
 Read the input SRT file and translate following all rules in `references/zh-tw-localization.md`.
+
+If the content is clearly genre-specific, load extra references before translating:
+- FPS / battle royale / hero shooter content: also read `references/zh-tw-fps-terms.md`
+- Fighting game / FGC / frame-data / matchup content: also read `references/zh-tw-fighting-game-terms.md`
+
+Do not load those genre-specific references for unrelated content.
 
 **Translate in chunks of 5–10 blocks at a time**, not block-by-block. This provides enough context to:
 - Produce natural Chinese phrasing across block boundaries
