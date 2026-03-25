@@ -18,6 +18,7 @@ interface Options {
   chapters: boolean;
   speakers: boolean;
   refresh: boolean;
+  section: { start: number; end: number } | null;
 }
 
 interface Snippet {
@@ -339,6 +340,40 @@ function tsMs(t: number, sep: string): string {
   const s = Math.floor(t % 60);
   const ms = Math.round((t - Math.floor(t)) * 1000);
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}${sep}${String(ms).padStart(3, "0")}`;
+}
+
+// --- Section filter (trim + rebase to 00:00:00) ---
+
+function parseSectionTimestamp(t: string): number {
+  const m = t.trim().match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+  if (!m) throw new Error(`Invalid section timestamp: "${t}". Use HH:MM:SS`);
+  return parseInt(m[1]) * 3600 + parseInt(m[2]) * 60 + parseInt(m[3]);
+}
+
+function parseSection(s: string): { start: number; end: number } {
+  s = s.replace(/^\*/, "").trim();
+  const parts = s.split("-");
+  if (parts.length !== 2) throw new Error(`Invalid section format: "${s}". Use HH:MM:SS-HH:MM:SS`);
+  const start = parseSectionTimestamp(parts[0]);
+  const end = parseSectionTimestamp(parts[1]);
+  if (end <= start) throw new Error(`Section end must be after start: ${s}`);
+  return { start, end };
+}
+
+function applySectionFilter(snippets: Snippet[], start: number, end: number): Snippet[] {
+  const result: Snippet[] = [];
+  for (const s of snippets) {
+    const sEnd = s.start + s.duration;
+    if (sEnd <= start || s.start >= end) continue;
+    const clampedStart = Math.max(s.start, start);
+    const clampedEnd = Math.min(sEnd, end);
+    result.push({
+      text: s.text,
+      start: clampedStart - start,
+      duration: clampedEnd - clampedStart,
+    });
+  }
+  return result;
 }
 
 // --- Sentence segmentation ---
@@ -711,6 +746,11 @@ async function processVideo(videoId: string, opts: Options): Promise<VideoResult
     sentences = sentences!;
   }
 
+  if (opts.section) {
+    snippets = applySectionFilter(snippets, opts.section.start, opts.section.end);
+    sentences = segmentIntoSentences(snippets);
+  }
+
   let content: string;
   let ext: string;
 
@@ -754,6 +794,7 @@ Options:
   --speakers                   Raw transcript with metadata for speaker identification
   --exclude-generated          Skip auto-generated transcripts
   --exclude-manually-created   Skip manually created transcripts
+  --section <range>            Extract section and rebase to 00:00:00 (e.g. 01:00:00-02:30:00)
   --refresh                    Force re-fetch (ignore cache)
   -o, --output <path>          Save to specific file path
   --output-dir <dir>           Base output directory (default: youtube-transcript)
@@ -775,6 +816,7 @@ function parseArgs(argv: string[]): Options | null {
     chapters: false,
     speakers: false,
     refresh: false,
+    section: null,
   };
 
   for (let i = 0; i < argv.length; i++) {
@@ -808,6 +850,8 @@ function parseArgs(argv: string[]): Options | null {
       opts.excludeGenerated = true;
     } else if (arg === "--exclude-manually-created") {
       opts.excludeManual = true;
+    } else if (arg === "--section") {
+      opts.section = parseSection(argv[++i] || "");
     } else if (arg === "--refresh") {
       opts.refresh = true;
     } else if (arg === "-o" || arg === "--output") {

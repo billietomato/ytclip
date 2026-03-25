@@ -187,17 +187,16 @@ YouTube 網址
 
 ### 第 0 步 — 下載直播錄影
 
-用 yt-dlp 下載影片：
+用 yt-dlp 下載影片。你可以選擇下載整場直播，或只下載特定區段。
 
+**A) 下載整場直播：**
 ```bash
 yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]' \
   -o 'raw-video.%(ext)s' \
   'https://www.youtube.com/watch?v=VIDEO_ID'
 ```
 
-> **小提示：** 把 `VIDEO_ID` 換成這次要剪的直播影片 ID。網址記得用單引號包起來，避免 shell 出問題。
-
-如果你只想先處理特定區段，例如 `1:00:00` 到 `2:30:00`：
+**B) 只下載特定區段**（例如 `1:00:00` 到 `2:30:00`）：
 ```bash
 yt-dlp --download-sections "*01:00:00-02:30:00" \
   -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]' \
@@ -205,22 +204,40 @@ yt-dlp --download-sections "*01:00:00-02:30:00" \
   'https://www.youtube.com/watch?v=VIDEO_ID'
 ```
 
-現在你的資料夾長這樣：
-```
-my-video/
-  raw-video.mp4
-```
+> **小提示：** 把 `VIDEO_ID` 換成這次要剪的直播影片 ID。網址記得用單引號包起來，避免 shell 出問題。
 
 ### 第 1 步 — 下載逐字稿
 
-這一步會把 YouTube 上的字幕抓成 SRT，作為後續找片段、對字幕和翻譯的基礎。
+這一步會把 YouTube 上的字幕抓成 SRT，作為後續找片段、對字幕和翻譯的基礎。**字幕的時間範圍必須和影片一致，匯入剪輯軟體後才會同步。**
 
+**A) 下載整場逐字稿**（搭配整場直播影片）：
+
+用 CLI：
 ```bash
 bun ytclip-1-transcript/scripts/main.ts \
   'https://www.youtube.com/watch?v=VIDEO_ID' \
   --format srt \
   -o my-video/transcript-en.srt
 ```
+
+或用 AI 代理：
+> Use ytclip-1-transcript skill. 下載 `https://www.youtube.com/watch?v=VIDEO_ID` 的完整英文字幕，存為 `my-video/transcript-en.srt`。
+
+**B) 只下載特定區段的逐字稿**（搭配用 `--download-sections` 下載的影片區段）：
+
+用 CLI：
+```bash
+bun ytclip-1-transcript/scripts/main.ts \
+  'https://www.youtube.com/watch?v=VIDEO_ID' \
+  --format srt \
+  --section '01:00:00-02:30:00' \
+  -o my-video/transcript-en.srt
+```
+
+或用 AI 代理：
+> Use ytclip-1-transcript skill. 下載 `https://www.youtube.com/watch?v=VIDEO_ID` 的英文字幕，只擷取 `01:00:00-02:30:00` 區段，時間戳歸零從 00:00:00 開始。存為 `my-video/transcript-en.srt`。
+
+> **時間同步：** `--section` 會自動把時間戳歸零到 `00:00:00` 開始，和 yt-dlp 的 `--download-sections` 輸出的影片完全同步。匯入剪輯軟體後影片和字幕會自動對齊。
 
 **想要其他語言的字幕**，如果原片本來就有提供，也可以直接抓那個版本：
 ```bash
@@ -236,7 +253,7 @@ bun ytclip-1-transcript/scripts/main.ts 'https://www.youtube.com/watch?v=VIDEO_I
 ```
 my-video/
   raw-video.mp4
-  transcript-en.srt          ← 英文字幕，時間戳對應原始錄影
+  transcript-en.srt          ← 英文字幕，時間戳和影片同步
 ```
 
 ### 第 2 步 — 找出有趣片段（AI）

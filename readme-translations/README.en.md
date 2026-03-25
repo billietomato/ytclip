@@ -189,17 +189,16 @@ YouTube URL
 
 ### Step 0 — Download the VOD
 
-Download the video using yt-dlp:
+Download the video using yt-dlp. You can grab the full stream or just a specific section.
 
+**A) Download the full stream:**
 ```bash
 yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]' \
   -o 'raw-video.%(ext)s' \
   'https://www.youtube.com/watch?v=VIDEO_ID'
 ```
 
-> **Tip:** Replace `VIDEO_ID` with the stream's actual video ID. Keep the URL in single quotes to avoid shell issues.
-
-If you only want a specific section to work from, for example `1:00:00` to `2:30:00`:
+**B) Download a specific section only** (e.g. `1:00:00` to `2:30:00`):
 ```bash
 yt-dlp --download-sections "*01:00:00-02:30:00" \
   -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]' \
@@ -207,22 +206,40 @@ yt-dlp --download-sections "*01:00:00-02:30:00" \
   'https://www.youtube.com/watch?v=VIDEO_ID'
 ```
 
-Your folder now looks like:
-```
-my-video/
-  raw-video.mp4
-```
+> **Tip:** Replace `VIDEO_ID` with the stream's actual video ID. Keep the URL in single quotes to avoid shell issues.
 
 ### Step 1 — Download the Transcript
 
-Pull the video's subtitles from YouTube as an SRT file. This becomes the base for scoring, clipping, and translation.
+Pull the video's subtitles from YouTube as an SRT file. This becomes the base for scoring, clipping, and translation. **The transcript's time range must match the video so they stay in sync when imported into your editor.**
 
+**A) Download the full transcript** (to match the full stream):
+
+Using the CLI:
 ```bash
 bun ytclip-1-transcript/scripts/main.ts \
   'https://www.youtube.com/watch?v=VIDEO_ID' \
   --format srt \
   -o my-video/transcript-en.srt
 ```
+
+Or using an AI agent:
+> Use ytclip-1-transcript skill. Download the full English transcript for `https://www.youtube.com/watch?v=VIDEO_ID` and save it as `my-video/transcript-en.srt`.
+
+**B) Download a section of the transcript** (to match a video downloaded with `--download-sections`):
+
+Using the CLI:
+```bash
+bun ytclip-1-transcript/scripts/main.ts \
+  'https://www.youtube.com/watch?v=VIDEO_ID' \
+  --format srt \
+  --section '01:00:00-02:30:00' \
+  -o my-video/transcript-en.srt
+```
+
+Or using an AI agent:
+> Use ytclip-1-transcript skill. Download the English transcript for `https://www.youtube.com/watch?v=VIDEO_ID`, extract only the `01:00:00-02:30:00` section with timestamps rebased to 00:00:00. Save as `my-video/transcript-en.srt`.
+
+> **Timestamp sync:** The `--section` flag automatically rebases timestamps to start at `00:00:00`, matching the video produced by yt-dlp's `--download-sections`. When you import both into your editor, they will be perfectly in sync.
 
 **Choose a different subtitle language** if the VOD already has the version you want to work from:
 ```bash
@@ -238,7 +255,7 @@ Your folder now looks like:
 ```
 my-video/
   raw-video.mp4
-  transcript-en.srt          ← English subtitles with VOD timestamps
+  transcript-en.srt          ← English subtitles, timestamps synced with video
 ```
 
 ### Step 2 — Find Interesting Moments (AI)

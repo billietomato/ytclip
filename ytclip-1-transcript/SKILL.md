@@ -52,6 +52,11 @@ Download with language preference:
 ${BUN_X} {baseDir}/scripts/main.ts '<youtube-url>' --format srt --languages en,zh,ja
 ```
 
+Download a section (timestamps rebased to 00:00:00, syncs with yt-dlp `--download-sections`):
+```bash
+${BUN_X} {baseDir}/scripts/main.ts '<youtube-url>' --format srt --section '01:00:00-02:30:00' -o ~/my-video/transcript-en.srt
+```
+
 ## Quality Requirements
 
 - Output full transcript, not summary.
