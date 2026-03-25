@@ -57,7 +57,7 @@ bun --version
 
 ### 3. Claude Code (AI agent for scoring & translation)
 
-Steps 2, 5, and 6 use an AI agent to find interesting moments, translate, and proofread subtitles. This README uses **Claude Code** as the example.
+Steps 2, 5, and 7 use an AI agent to find interesting moments, translate, and proofread subtitles. This README uses **Claude Code** as the example.
 
 1. **Create an Anthropic account** — Go to [claude.ai](https://claude.ai) and sign up
 2. **Subscription or API key** — To use AI models with Claude Code, you need an active subscription or an API key. Sonnet 4.6 is recommended.
@@ -70,7 +70,7 @@ Steps 2, 5, and 6 use an AI agent to find interesting moments, translate, and pr
    claude
    ```
 
-> **Using a different AI agent?** If it can follow the `SKILL.md` files and reference docs used in Steps 2, 5, and 6, it can do the same job.
+> **Using a different AI agent?** If it can follow the `SKILL.md` files and reference docs used in Steps 2, 5, and 7, it can do the same job.
 
 ### 4. A Video Editor
 
@@ -152,14 +152,14 @@ YouTube URL
     │  zh-TW SRT
     ▼
 ┌───────────────────────────────┐
-│ Step 6: Proofread zh-TW       │  ytclip-5-proofread-zhtw (AI)
-└───────────────────────────────┘
-    │  Proofread SRT
-    ▼
-┌───────────────────────────────┐
-│ Step 7: Manual subtitle edit  │  Your video editor
+│ Step 6: Manual subtitle edit  │  Your video editor
 └───────────────────────────────┘
     │  Fine-tuned zh-TW SRT
+    ▼
+┌───────────────────────────────┐
+│ Step 7: Proofread zh-TW       │  ytclip-5-proofread-zhtw (AI)
+└───────────────────────────────┘
+    │  Proofread SRT
     ▼
 ┌───────────────────────────────┐
 │ Step 8: Export zh-TW clip     │  Your video editor
@@ -170,8 +170,7 @@ YouTube URL
 ─── Phase 3: Convert to SC & Export ────────────
     │
 ┌───────────────────────────────┐
-│ Step 9: Export zh-TW SRT &    │  ytclip-6-convert-tc-to-sc
-│         convert TC → SC       │
+│ Step 9: Convert TC → SC       │  ytclip-6-convert-tc-to-sc
 └───────────────────────────────┘
     │  zh-CN SRT
     ▼
@@ -389,17 +388,9 @@ Translate the remapped English subtitles into Traditional Chinese (Taiwan). Open
 
 The AI reads your SRT directly. The localization rules handle Taiwan fan terminology, in-jokes, and community tone.
 
-### Step 6 — Proofread zh-TW Subtitles (AI)
+### Step 6 — Manual Subtitle Edit
 
-Have the AI proofread the translated zh-TW SRT for confirmed typos only — no style suggestions. Open Claude Code and ask:
-
-> Use ytclip-5-proofread-zhtw skill. Proofread `my-video/transcript-zhtw-remapped.srt` and report only confirmed typos (wrong characters, garbled text, obvious mistakes).
-
-The AI will report each typo with its SRT block number, the original line, and the correct text. If the file is clean, it will say so. Fix any reported typos in the SRT file first.
-
-### Step 7 — Manual Subtitle Edit
-
-Import the proofread zh-TW SRT into your video editor and review each line against the video:
+Import the translated zh-TW SRT into your video editor and review each line against the video:
 
 | Editor | How to import SRT |
 |--------|-------------------|
@@ -413,7 +404,25 @@ Play through and check:
 2. **Refine wording** — AI translations may not perfectly match your tone; this is your last chance to polish
 3. **Check for overlap** — make sure subtitles don't cover important visuals
 
-> This step is the quality gate. The SRT you produce here will also be used to generate the Simplified Chinese version, so fixing it now saves you from fixing it twice.
+> This step is the quality gate. Get the timing, wording, and line breaks where you want them first, then export the final SRT for one last typo pass by AI.
+
+#### Export the adjusted zh-TW SRT
+
+| Editor | How to export SRT |
+|--------|-------------------|
+| **Premiere Pro** | File > Export > Captions, choose SRT format |
+| **Final Cut Pro** | File > Export Captions, choose SRT format |
+| **DaVinci Resolve** | Deliver page > Subtitle settings > export as standalone SRT file |
+
+Save as `my-video/transcript-zhtw-final.srt`.
+
+### Step 7 — Proofread zh-TW Subtitles (AI)
+
+Have the AI proofread your manually adjusted final zh-TW SRT for confirmed typos only — no style suggestions. Open Claude Code and ask:
+
+> Use ytclip-5-proofread-zhtw skill. Proofread `my-video/transcript-zhtw-final.srt` and report only confirmed typos (wrong characters, garbled text, obvious mistakes).
+
+The AI will report each typo with its SRT block number, the original line, and the correct text. If the file is clean, it will say so. Fix any reported typos in `my-video/transcript-zhtw-final.srt`, then re-import it into your editor to replace the original zh-TW subtitle track.
 
 ### Step 8 — Export zh-TW Clip
 
@@ -439,21 +448,11 @@ zh-TW version done!
 
 ## Phase 3: Convert to SC & Export
 
-### Step 9 — Export zh-TW SRT & Convert to Simplified Chinese
+### Step 9 — Convert to Simplified Chinese
 
-Export the manually reviewed zh-TW SRT from your editor, then convert it to Simplified Chinese.
+Take the final zh-TW SRT proofread in Step 7 and convert it to Simplified Chinese.
 
-#### 9a. Export the reviewed zh-TW SRT
-
-| Editor | How to export SRT |
-|--------|-------------------|
-| **Premiere Pro** | File > Export > Captions, choose SRT format |
-| **Final Cut Pro** | File > Export Captions, choose SRT format |
-| **DaVinci Resolve** | Deliver page > Subtitle settings > export as standalone SRT file |
-
-Save as `my-video/transcript-zhtw-final.srt`.
-
-#### 9b. Convert TC → SC
+#### 9a. Convert TC → SC
 
 ```bash
 bun ytclip-6-convert-tc-to-sc/scripts/convert.ts \
@@ -496,8 +495,8 @@ my-video/
   export.xml                       Editor timeline export
   clip_manifest.json               Parsed cut timing data
   transcript-en-remapped.srt       English subtitles aligned to your cut
-  transcript-zhtw-remapped.srt     AI-translated and proofread zh-TW subtitles
-  transcript-zhtw-final.srt        Manually reviewed zh-TW subtitles (exported from editor)
+  transcript-zhtw-remapped.srt     AI-translated zh-TW subtitles
+  transcript-zhtw-final.srt        Final zh-TW subtitles (manual edit + AI proofreading)
   transcript-zhcn-final.srt        Simplified Chinese subtitles (TC→SC conversion)
 ```
 
