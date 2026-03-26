@@ -190,18 +190,18 @@ YouTube URL
 
 Download the video using yt-dlp. You can grab the full stream or just a specific section.
 
-**A) Download the full stream:**
+**A) Download the full stream (standard default: up to 1080p, prefer H.264/avc1):**
 ```bash
-yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]' \
-  -o 'raw-video.%(ext)s' \
+yt-dlp -f "bestvideo[vcodec^=avc1][height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[vcodec^=avc1][height<=1080][ext=mp4]" \
+  -o "raw-video.%(ext)s" \
   'https://www.youtube.com/watch?v=VIDEO_ID'
 ```
 
 **B) Download a specific section only** (e.g. `1:00:00` to `2:30:00`):
 ```bash
 yt-dlp --download-sections "*01:00:00-02:30:00" \
-  -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]' \
-  -o 'raw-video.%(ext)s' \
+  -f "bestvideo[vcodec^=avc1][height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[vcodec^=avc1][height<=1080][ext=mp4]" \
+  -o "raw-video.%(ext)s" \
   'https://www.youtube.com/watch?v=VIDEO_ID'
 ```
 
@@ -216,7 +216,7 @@ Pull the video's subtitles from YouTube as an SRT file. This becomes the base fo
 Using the CLI:
 ```bash
 bun ytclip-1-transcript/scripts/main.ts \
-  'https://www.youtube.com/watch?v=VIDEO_ID' \
+  "https://www.youtube.com/watch?v=VIDEO_ID" \
   --format srt \
   -o my-video/transcript-en.srt
 ```
@@ -229,9 +229,9 @@ Or using an AI agent:
 Using the CLI:
 ```bash
 bun ytclip-1-transcript/scripts/main.ts \
-  'https://www.youtube.com/watch?v=VIDEO_ID' \
+  "https://www.youtube.com/watch?v=VIDEO_ID" \
   --format srt \
-  --section '01:00:00-02:30:00' \
+  --section "01:00:00-02:30:00" \
   -o my-video/transcript-en.srt
 ```
 
@@ -243,10 +243,10 @@ Or using an AI agent:
 **Choose a different subtitle language** if the VOD already has the version you want to work from:
 ```bash
 # List available languages first
-bun ytclip-1-transcript/scripts/main.ts 'https://www.youtube.com/watch?v=VIDEO_ID' --list
+bun ytclip-1-transcript/scripts/main.ts "https://www.youtube.com/watch?v=VIDEO_ID" --list
 
 # Download Japanese subtitles
-bun ytclip-1-transcript/scripts/main.ts 'https://www.youtube.com/watch?v=VIDEO_ID' \
+bun ytclip-1-transcript/scripts/main.ts "https://www.youtube.com/watch?v=VIDEO_ID" \
   --format srt --languages ja -o my-video/transcript-ja.srt
 ```
 
@@ -273,7 +273,7 @@ bun ytclip-2-highlight-moments/scripts/clip_candidates.ts \
 ```bash
 bun ytclip-2-highlight-moments/scripts/clip_candidates.ts \
   my-video/transcript-en.srt \
-  --focus 'announcement,new outfit' \
+  --focus "announcement,new outfit" \
   -o my-video/chunks.json
 ```
 

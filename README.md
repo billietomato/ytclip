@@ -189,18 +189,18 @@ YouTube 網址
 
 用 yt-dlp 下載影片。你可以選擇下載整場直播，或只下載特定區段。
 
-**A) 下載整場直播：**
+**A) 下載整場直播（通用預設：1080p 內、優先 H.264/avc1）：**
 ```bash
-yt-dlp -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]' \
-  -o 'raw-video.%(ext)s' \
+yt-dlp -f "bestvideo[vcodec^=avc1][height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[vcodec^=avc1][height<=1080][ext=mp4]" \
+  -o "raw-video.%(ext)s" \
   'https://www.youtube.com/watch?v=VIDEO_ID'
 ```
 
 **B) 只下載特定區段**（例如 `1:00:00` 到 `2:30:00`）：
 ```bash
 yt-dlp --download-sections "*01:00:00-02:30:00" \
-  -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]' \
-  -o 'raw-video.%(ext)s' \
+  -f "bestvideo[vcodec^=avc1][height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[vcodec^=avc1][height<=1080][ext=mp4]" \
+  -o "raw-video.%(ext)s" \
   'https://www.youtube.com/watch?v=VIDEO_ID'
 ```
 
@@ -215,7 +215,7 @@ yt-dlp --download-sections "*01:00:00-02:30:00" \
 用 CLI：
 ```bash
 bun ytclip-1-transcript/scripts/main.ts \
-  'https://www.youtube.com/watch?v=VIDEO_ID' \
+  "https://www.youtube.com/watch?v=VIDEO_ID" \
   --format srt \
   -o my-video/transcript-en.srt
 ```
@@ -228,9 +228,9 @@ bun ytclip-1-transcript/scripts/main.ts \
 用 CLI：
 ```bash
 bun ytclip-1-transcript/scripts/main.ts \
-  'https://www.youtube.com/watch?v=VIDEO_ID' \
+  "https://www.youtube.com/watch?v=VIDEO_ID" \
   --format srt \
-  --section '01:00:00-02:30:00' \
+  --section "01:00:00-02:30:00" \
   -o my-video/transcript-en.srt
 ```
 
@@ -242,10 +242,10 @@ bun ytclip-1-transcript/scripts/main.ts \
 **想要其他語言的字幕**，如果原片本來就有提供，也可以直接抓那個版本：
 ```bash
 # 先列出可用的語言
-bun ytclip-1-transcript/scripts/main.ts 'https://www.youtube.com/watch?v=VIDEO_ID' --list
+bun ytclip-1-transcript/scripts/main.ts "https://www.youtube.com/watch?v=VIDEO_ID" --list
 
 # 下載日文字幕
-bun ytclip-1-transcript/scripts/main.ts 'https://www.youtube.com/watch?v=VIDEO_ID' \
+bun ytclip-1-transcript/scripts/main.ts "https://www.youtube.com/watch?v=VIDEO_ID" \
   --format srt --languages ja -o my-video/transcript-ja.srt
 ```
 
@@ -272,7 +272,7 @@ bun ytclip-2-highlight-moments/scripts/clip_candidates.ts \
 ```bash
 bun ytclip-2-highlight-moments/scripts/clip_candidates.ts \
   my-video/transcript-en.srt \
-  --focus 'announcement,new outfit' \
+  --focus "announcement,new outfit" \
   -o my-video/chunks.json
 ```
 
