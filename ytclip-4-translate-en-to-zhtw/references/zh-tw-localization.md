@@ -20,11 +20,19 @@ Translate/localize the FULL SRT script into natural Traditional Chinese used by 
 - Preserve code, URLs, and command lines unchanged.
 - Do not add speaker markers (e.g., >>, →, speaker labels). Leave multi-speaker attribution to the user.
 
-## Filler Words
+## Filler Words vs. Transition Words
 
-- **Remove** English filler words instead of translating them: Uh, Um, Hmm, Like (as filler), You know, I mean, So (sentence-starter filler), Basically (when not adding meaning).
+- **Remove** pure English filler words instead of translating them: Uh, Um, Hmm, Like (as filler), I mean, Basically (when not adding meaning).
 - If a filler is the only content in a block, keep the block but leave the text empty or use a single `⋯` if the pause is meaningful.
 - Exception: keep fillers that carry emotional weight (e.g., hesitation before bad news, comedic timing).
+- **Do NOT blank transition words into `⋯`.** Short words that carry structural meaning in storytelling should be translated, not treated as filler:
+  - "and" / "and then" → `然後`
+  - "so" → `所以`
+  - "but" / "but also" → `但是` / `不過`
+  - "you know" → `你知道嗎`
+  - "apparently" → `看起來`
+  - "before" → `之前`
+  - These words help the audience follow the speaker's narrative flow. Removing them creates jarring gaps in the story.
 
 ## Pauses & Trailing Off
 
@@ -60,8 +68,15 @@ Use these Taiwan-style expressions for common English words:
 | what the hell | 搞什麼 |
 | no way | 不會吧 |
 | seriously? | 認真的嗎 |
+| spoiler / no spoilers | 爆雷 / 不爆雷 |
 
 These are guidelines — adapt naturally to context. Do not force-fit if the tone doesn't match.
+
+## Formatting
+
+- **No spaces around proper nouns**: do not insert spaces between a romanized proper noun and surrounding Chinese characters. Write `找Alice聊` not `找 Alice 聊`.
+- **Half-width parentheses** for inline annotations: use `ramen (拉麵)` not `ramen（拉麵）`.
+- **Arabic numerals** for numbers in casual speech: use Arabic numerals for sequential counting, prices, amounts, and stats. Write `10`, `20`, `30` not `十`, `二十`, `三十`. Write `500元` not `五百元`. Exception: set phrases where the Chinese character is part of the idiom (e.g., `一塊錢`, `兩個人`).
 
 ## Style Guidelines (Taiwan)
 
@@ -70,6 +85,9 @@ These are guidelines — adapt naturally to context. Do not force-fit if the ton
 - Keep cadence conversational; avoid stiff textbook syntax.
 - Translate for natural Chinese phrasing, not word-for-word from English. Restructure sentences freely to sound natural in Chinese.
 - Keep each subtitle block short and punchy — aim for one natural phrase per block. Avoid cramming multiple ideas into a single block.
+- **Subject retention for subtitles**: in subtitle translation, lean toward including subjects (我, 她, 我們) for readability — viewers have limited reading time and cannot re-read. Do not drop subjects as aggressively as you would in prose Chinese.
+- **Preserve quoted speech perspective**: when translating reported speech that is clearly a direct quote (speaker mimicking someone else's words), preserve the first-person pronouns from the quoted speaker's perspective. E.g., `他說，我不想去` not `他說，他不想去`.
+- **Soft particle `吧`**: use `吧` for soft suggestions, self-directed decisions, and casual proposals — it sounds natural and warm in spoken Chinese. E.g., `我們走吧`, `你來決定吧`.
 - Use common Taiwan terms where natural:
   - 影片 over 视频
   - 畫面 over 屏幕
@@ -92,7 +110,13 @@ These are guidelines — adapt naturally to context. Do not force-fit if the ton
 
 ## Tone Adaptation
 
-When the source tone is casual, use lightweight Taiwanese net-speech naturally (e.g., 真的很扯, 超有感, 直接破防, 這段太神) but avoid overdoing slang in serious/technical segments.
+When the source tone is casual, use lightweight Taiwanese net-speech naturally but avoid overdoing slang in serious/technical segments.
+
+Vivid TW-style intensifier patterns to use when the speaker is being emphatic or emotional:
+- `有夠X` — e.g., `有夠噁的`
+- `X死了` — e.g., `嚇死人了`, `累死了`
+- `超～X` — e.g., `超～多的` (use `～` for stretched emphasis)
+- `真的很扯`, `超有感`, `直接破防`, `這段太神`
 
 ## Output Format
 

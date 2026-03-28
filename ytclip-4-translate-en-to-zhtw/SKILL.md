@@ -60,7 +60,8 @@ Key rules:
 - Prefer light punctuation: internal `，` for natural clause turns, `？` for real questions, `⋯` for trailing off, `～` only for stretched reactions/interjections
 - Default to no sentence-final `。`; only use it for a deliberate hard beat when it clearly improves rhythm
 - Do not add speaker markers (>> or labels)
-- Remove English filler words (Uh, Um, Like, You know) instead of translating them
+- Remove pure English filler words (Uh, Um, Like-as-filler) instead of translating them
+- Translate short transition words that carry structural meaning in storytelling (and → 然後, so → 所以, but → 但是, you know → 你知道嗎, apparently → 看起來). Do not blank these into `⋯`
 - Use `⋯` for pauses and trailing off
 - Keep people names in original language
 - Apply the confirmed glossary from Step 1
@@ -69,6 +70,7 @@ Key rules:
   - "oh shit" and similar → 靠 / 喔靠
   - "Oh" → 喔
   - "Oh my god" → 喔天啊 / 我的天啊 / 天啊 / 天哪
+  - "spoiler" / "no spoilers" → 爆雷 / 不爆雷
 
 ### Step 3: Block Splitting
 
