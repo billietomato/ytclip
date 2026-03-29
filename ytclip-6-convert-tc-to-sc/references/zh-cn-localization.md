@@ -139,6 +139,17 @@ Platform notes:
 | 首杀 | 首杀 / 首通 | First clear (same) |
 | 实况野团 / 野团 | 野队 / 野团 | Pickup group |
 
+## Do NOT Localize
+
+The goal is to fix terms that would genuinely confuse mainland viewers — not to erase every trace of TW flavor. Leave these alone:
+
+- **Near-synonyms that are mutually intelligible.** If a word exists and is understood in mainland Chinese — even if it's less common — do not swap it. A mainland viewer understands these without friction.
+- **Minor orthographic variants.** Character-level differences are not localization issues. Do not change them.
+- **TW colloquial expressions that are understandable in context.** These carry the speaker's personality. If a mainland viewer can parse the meaning from context, keep it. Only replace expressions that would genuinely bewilder a mainland audience.
+- **Sentence structure.** Never restructure word order, split/merge clauses, or rewrite a sentence "more naturally." Localization means swapping individual terms, not rewriting prose. The speaker's phrasing and rhythm should survive intact.
+
+Rule of thumb: if you have to rewrite more than one or two words in a subtitle line, you are probably over-localizing. Stop and reconsider whether the change is truly necessary for comprehension.
+
 ## Phrasing & Style
 
 - Mainland internet Chinese tends to be slightly more direct than TW style.

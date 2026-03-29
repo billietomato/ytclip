@@ -69,6 +69,9 @@ Apply these rules:
 - Do not add speaker markers
 - Keep names, URLs, code, and command lines unchanged
 - Do not over-localize shared internet expressions that already sound natural in both regions
+- Do not rewrite sentence structure — only swap individual terms when necessary for mainland comprehension
+- Do not swap near-synonyms or orthographic variants that mainland viewers already understand
+- Refer to the "Do NOT Localize" section in `references/zh-cn-localization.md`
 
 When a term has no clear mainland equivalent, prefer one of these in order:
 1. The official mainland Chinese term
