@@ -505,6 +505,125 @@ function groupSentenceParas(sentences: Sentence[]): Paragraph[] {
   return paras;
 }
 
+// --- Caption retiming ---
+// Re-segments raw YouTube auto-caption blocks at natural sentence boundaries
+// so each SRT entry reads as a proper caption line.
+
+const RETIME_MAX_WORDS = 10;
+const RETIME_MIN_DURATION_S = 1.2;
+const RETIME_GAP_THRESHOLD_S = 0.4;
+
+type CaptionWord = {
+  word: string;
+  start: number;
+  end: number;
+  forceBreakAfter?: boolean;
+};
+
+function snippetsToWords(snippets: Snippet[]): CaptionWord[] {
+  const words: CaptionWord[] = [];
+  for (let i = 0; i < snippets.length; i++) {
+    const s = snippets[i];
+    const rawWords = s.text.replace(/^>>\s*/g, "").split(/\s+/).filter(Boolean);
+    if (rawWords.length === 0) continue;
+    const perWord = s.duration / rawWords.length;
+    const next = snippets[i + 1];
+    const gapAfter = next ? next.start - (s.start + s.duration) : 0;
+    for (let j = 0; j < rawWords.length; j++) {
+      words.push({
+        word: rawWords[j],
+        start: s.start + j * perWord,
+        end: s.start + (j + 1) * perWord,
+        forceBreakAfter: j === rawWords.length - 1 && gapAfter >= RETIME_GAP_THRESHOLD_S,
+      });
+    }
+  }
+  return words;
+}
+
+function isCaptionSentenceEnd(word: string): boolean {
+  return /[.?!…。？！]$/.test(word);
+}
+
+function isCaptionCommaEnd(word: string): boolean {
+  return /[,;:，；：]$/.test(word);
+}
+
+function segmentCaptionWords(words: CaptionWord[]): { words: CaptionWord[] }[] {
+  const rawSegments: { words: CaptionWord[] }[] = [];
+  let current: CaptionWord[] = [];
+
+  const flush = () => {
+    if (current.length === 0) return;
+    rawSegments.push({ words: [...current] });
+    current = [];
+  };
+
+  for (const w of words) {
+    current.push(w);
+    const atSentenceEnd = isCaptionSentenceEnd(w.word);
+    const tooLong = current.length >= RETIME_MAX_WORDS;
+    const forcedBreak = w.forceBreakAfter === true;
+
+    if (forcedBreak || atSentenceEnd) {
+      flush();
+    } else if (tooLong) {
+      let commaIdx = -1;
+      for (let i = current.length - 1; i >= 0; i--) {
+        if (isCaptionCommaEnd(current[i].word)) { commaIdx = i; break; }
+      }
+      if (commaIdx >= 0 && commaIdx >= current.length / 2) {
+        const keep = current.slice(0, commaIdx + 1);
+        const rest = current.slice(commaIdx + 1);
+        current = keep;
+        flush();
+        current = rest;
+      } else {
+        flush();
+      }
+    }
+  }
+  flush();
+
+  // Merge adjacent very-short segments that have no silence gap between them
+  const merged: { words: CaptionWord[] }[] = [];
+  for (const seg of rawSegments) {
+    const dur = seg.words[seg.words.length - 1].end - seg.words[0].start;
+    const isShort = dur < RETIME_MIN_DURATION_S && seg.words.length <= 3;
+    const prev = merged[merged.length - 1];
+    const gapToPrev = prev ? seg.words[0].start - prev.words[prev.words.length - 1].end : Infinity;
+    const isDangling = seg.words.length <= 3 && /^[a-z]/.test(seg.words[0].word);
+    const mergeLimit = isDangling ? RETIME_MAX_WORDS + 3 : RETIME_MAX_WORDS;
+
+    if (isShort && prev && gapToPrev < RETIME_GAP_THRESHOLD_S && prev.words.length + seg.words.length <= mergeLimit) {
+      merged[merged.length - 1] = { words: [...prev.words, ...seg.words] };
+    } else {
+      merged.push(seg);
+    }
+  }
+
+  return merged;
+}
+
+function retimeForCaptions(snippets: Snippet[]): Snippet[] {
+  const words = snippetsToWords(snippets);
+  if (words.length === 0) return snippets;
+  const segments = segmentCaptionWords(words);
+
+  return segments.map((seg) => {
+    const start = seg.words[0].start;
+    let end = seg.words[seg.words.length - 1].end;
+    if (end - start < RETIME_MIN_DURATION_S) {
+      end = start + RETIME_MIN_DURATION_S;
+    }
+    return {
+      text: seg.words.map((w) => w.word).join(" "),
+      start,
+      duration: end - start,
+    };
+  });
+}
+
 // --- Format functions ---
 
 function formatSrt(snippets: Snippet[]): string {
@@ -755,7 +874,7 @@ async function processVideo(videoId: string, opts: Options): Promise<VideoResult
   let ext: string;
 
   if (opts.format === "srt") {
-    content = formatSrt(snippets);
+    content = formatSrt(retimeForCaptions(snippets));
     ext = "srt";
   } else {
     content = formatMarkdown(

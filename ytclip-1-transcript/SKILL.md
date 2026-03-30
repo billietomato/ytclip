@@ -60,7 +60,7 @@ ${BUN_X} {baseDir}/scripts/main.ts '<youtube-url>' --format srt --section '01:00
 ## Quality Requirements
 
 - Output full transcript, not summary.
-- Preserve exact timestamps from source.
+- SRT output is automatically retimed: raw YouTube blocks are re-segmented at natural sentence boundaries, capped at 10 words per line, with silence gaps (>400ms) respected and short fragments merged.
 - Prefer source-language transcript before translated transcript when fidelity matters.
 
 ## Error Mapping
