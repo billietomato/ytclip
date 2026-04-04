@@ -83,6 +83,8 @@ For each block that is too long:
 
 Do not split blocks that are already short enough.
 
+**Timestamp validation**: After splitting, verify every block has `end > start`. If any input block has an invalid timestamp (end ≤ start), fix it by setting end = start + (character_count × 80ms, minimum 800ms), capped at the next block's start time. Use standard SRT timestamp format: `HH:MM:SS,mmm` where milliseconds are always exactly 3 digits (000–999).
+
 ### Step 4: Save
 
 Save the output as `<original-name>-zhtw.srt` next to the input file, or to a user-specified path.

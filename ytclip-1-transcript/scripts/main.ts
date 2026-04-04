@@ -335,10 +335,13 @@ function ts(t: number): string {
 }
 
 function tsMs(t: number, sep: string): string {
-  const h = Math.floor(t / 3600);
-  const m = Math.floor((t % 3600) / 60);
-  const s = Math.floor(t % 60);
-  const ms = Math.round((t - Math.floor(t)) * 1000);
+  let totalMs = Math.round(Math.max(0, t) * 1000);
+  const h = Math.floor(totalMs / 3600000);
+  totalMs %= 3600000;
+  const m = Math.floor(totalMs / 60000);
+  totalMs %= 60000;
+  const s = Math.floor(totalMs / 1000);
+  const ms = totalMs % 1000;
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}${sep}${String(ms).padStart(3, "0")}`;
 }
 
@@ -538,6 +541,16 @@ function snippetsToWords(snippets: Snippet[]): CaptionWord[] {
       });
     }
   }
+  // Enforce monotonic word timestamps — YouTube snippets can overlap
+  // (snippet[i].start + duration > snippet[i+1].start), creating backwards jumps.
+  for (let i = 1; i < words.length; i++) {
+    if (words[i].start < words[i - 1].end) {
+      const origDur = words[i].end - words[i].start;
+      words[i].start = words[i - 1].end;
+      words[i].end = words[i].start + Math.max(origDur, 0.01);
+    }
+  }
+
   return words;
 }
 
@@ -629,9 +642,10 @@ function retimeForCaptions(snippets: Snippet[]): Snippet[] {
 function formatSrt(snippets: Snippet[]): string {
   return snippets
     .map((s, i) => {
-      const end = i < snippets.length - 1 && snippets[i + 1].start < s.start + s.duration
+      let end = i < snippets.length - 1 && snippets[i + 1].start < s.start + s.duration
         ? snippets[i + 1].start
         : s.start + s.duration;
+      if (end <= s.start) end = s.start + Math.min(s.duration, RETIME_MIN_DURATION_S);
       return `${i + 1}\n${tsMs(s.start, ",")} --> ${tsMs(end, ",")}\n${s.text}`;
     })
     .join("\n\n") + "\n";
