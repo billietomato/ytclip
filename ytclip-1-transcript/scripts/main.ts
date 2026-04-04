@@ -543,11 +543,11 @@ function snippetsToWords(snippets: Snippet[]): CaptionWord[] {
   }
   // Enforce monotonic word timestamps — YouTube snippets can overlap
   // (snippet[i].start + duration > snippet[i+1].start), creating backwards jumps.
+  // When bumping start forward, keep the original end to avoid cascading inflation.
   for (let i = 1; i < words.length; i++) {
     if (words[i].start < words[i - 1].end) {
-      const origDur = words[i].end - words[i].start;
       words[i].start = words[i - 1].end;
-      words[i].end = words[i].start + Math.max(origDur, 0.01);
+      words[i].end = Math.max(words[i].end, words[i].start + 0.01);
     }
   }
 
