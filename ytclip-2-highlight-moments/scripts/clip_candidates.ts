@@ -21,15 +21,12 @@ interface TranscriptChunk {
   durationSec: number;
   subtitleCount: number;
   wordCount: number;
+  wordsPerMinute: number;
+  speechDensity: number;
+  silenceRatio: number;
+  longestSilenceSec: number;
+  estimatedTurns: number;
   text: string;
-  subtitles: Array<{
-    index: number;
-    start: string;
-    end: string;
-    startSec: number;
-    endSec: number;
-    text: string;
-  }>;
 }
 
 interface ChunkedTranscript {
@@ -39,6 +36,7 @@ interface ChunkedTranscript {
   totalDuration: string;
   chunkSizeSec: number;
   overlapSec: number;
+  markerIntervalSec: number;
   chunkCount: number;
   focusKeywords: string[];
   chunks: TranscriptChunk[];
@@ -48,6 +46,7 @@ interface Options {
   inputPath: string;
   chunkSize: number;
   overlap: number;
+  markerInterval: number;
   output: string;
   focusKeywords: string[];
 }
@@ -111,10 +110,108 @@ function countWords(text: string): number {
   return text.split(/\s+/).filter(Boolean).length;
 }
 
+/**
+ * Build text with inline [HH:MM:SS] timestamp markers.
+ *
+ * Markers are inserted:
+ * - At the start of the chunk
+ * - At every `intervalSec` boundary (snapped to the nearest subtitle start)
+ * - At silence gaps > 2 seconds
+ */
+function buildMarkedText(
+  subs: Subtitle[],
+  intervalSec: number
+): string {
+  if (!subs.length) return "";
+
+  const SILENCE_GAP_THRESHOLD = 2.0;
+  const parts: string[] = [];
+  let nextMarkerTime = subs[0].startSec; // first marker at chunk start
+
+  for (let i = 0; i < subs.length; i++) {
+    const sub = subs[i];
+    const prevEnd = i > 0 ? subs[i - 1].endSec : sub.startSec;
+    const gap = sub.startSec - prevEnd;
+
+    // Insert marker if: we've passed the next interval boundary, or there's a silence gap
+    const needsIntervalMarker = sub.startSec >= nextMarkerTime;
+    const needsGapMarker = gap > SILENCE_GAP_THRESHOLD && i > 0;
+
+    if (needsIntervalMarker || needsGapMarker) {
+      parts.push(`[${formatTs(sub.startSec)}]`);
+      // Advance the next marker time past the current position
+      while (nextMarkerTime <= sub.startSec) {
+        nextMarkerTime += intervalSec;
+      }
+    }
+
+    parts.push(sub.text);
+  }
+
+  return parts.join(" ");
+}
+
+/**
+ * Compute metrics for a set of subtitles within a chunk window.
+ */
+function computeMetrics(
+  subs: Subtitle[],
+  chunkDurationSec: number
+): {
+  speechDensity: number;
+  silenceRatio: number;
+  longestSilenceSec: number;
+  estimatedTurns: number;
+  wordsPerMinute: number;
+} {
+  if (!subs.length || chunkDurationSec <= 0) {
+    return {
+      speechDensity: 0,
+      silenceRatio: 1,
+      longestSilenceSec: chunkDurationSec,
+      estimatedTurns: 0,
+      wordsPerMinute: 0,
+    };
+  }
+
+  // Speech density: total speech time / chunk duration
+  const totalSpeechTime = subs.reduce((acc, s) => acc + s.duration, 0);
+  const speechDensity = Math.min(1, totalSpeechTime / chunkDurationSec);
+
+  // Longest silence gap between consecutive subtitles
+  let longestSilence = 0;
+  for (let i = 1; i < subs.length; i++) {
+    const gap = subs[i].startSec - subs[i - 1].endSec;
+    if (gap > longestSilence) longestSilence = gap;
+  }
+
+  // Estimated speaker turns: count gaps > 1.5s (rough proxy for speaker changes)
+  const TURN_GAP_THRESHOLD = 1.5;
+  let turns = 0;
+  for (let i = 1; i < subs.length; i++) {
+    const gap = subs[i].startSec - subs[i - 1].endSec;
+    if (gap > TURN_GAP_THRESHOLD) turns++;
+  }
+
+  // Words per minute
+  const totalWords = subs.reduce((acc, s) => acc + countWords(s.text), 0);
+  const durationMin = chunkDurationSec / 60;
+  const wordsPerMinute = durationMin > 0 ? totalWords / durationMin : 0;
+
+  return {
+    speechDensity: Number(speechDensity.toFixed(3)),
+    silenceRatio: Number((1 - speechDensity).toFixed(3)),
+    longestSilenceSec: Number(longestSilence.toFixed(1)),
+    estimatedTurns: turns,
+    wordsPerMinute: Number(wordsPerMinute.toFixed(1)),
+  };
+}
+
 function chunkTranscript(
   subs: Subtitle[],
   chunkSizeSec: number,
-  overlapSec: number
+  overlapSec: number,
+  markerIntervalSec: number
 ): TranscriptChunk[] {
   if (!subs.length) return [];
 
@@ -127,16 +224,19 @@ function chunkTranscript(
   while (windowStart < totalEnd) {
     const windowEnd = windowStart + chunkSizeSec;
 
-    // Find subtitles that fall within this window.
-    // A subtitle is included if it overlaps the window at all.
+    // Find subtitles that overlap this window
     const chunkSubs = subs.filter(
       (s) => s.endSec > windowStart && s.startSec < windowEnd
     );
 
     if (chunkSubs.length > 0) {
-      const text = chunkSubs.map((s) => s.text).join(" ");
       const actualStart = chunkSubs[0].startSec;
       const actualEnd = chunkSubs[chunkSubs.length - 1].endSec;
+      const durationSec = actualEnd - actualStart;
+
+      const text = buildMarkedText(chunkSubs, markerIntervalSec);
+      const wordCount = countWords(text.replace(/\[\d{2}:\d{2}:\d{2}\]/g, ""));
+      const metrics = computeMetrics(chunkSubs, durationSec);
 
       chunks.push({
         chunkIndex,
@@ -144,18 +244,15 @@ function chunkTranscript(
         end: formatTs(actualEnd),
         startSec: Number(actualStart.toFixed(3)),
         endSec: Number(actualEnd.toFixed(3)),
-        durationSec: Number((actualEnd - actualStart).toFixed(3)),
+        durationSec: Number(durationSec.toFixed(3)),
         subtitleCount: chunkSubs.length,
-        wordCount: countWords(text),
+        wordCount,
+        wordsPerMinute: metrics.wordsPerMinute,
+        speechDensity: metrics.speechDensity,
+        silenceRatio: metrics.silenceRatio,
+        longestSilenceSec: metrics.longestSilenceSec,
+        estimatedTurns: metrics.estimatedTurns,
         text,
-        subtitles: chunkSubs.map((s) => ({
-          index: s.index,
-          start: s.start,
-          end: s.end,
-          startSec: s.startSec,
-          endSec: s.endSec,
-          text: s.text,
-        })),
       });
 
       chunkIndex++;
@@ -171,13 +268,15 @@ function printHelp() {
   console.log(`Usage: bun clip_candidates.ts <srt-file> [options]
 
 Preprocess an SRT transcript into timestamped chunks for AI evaluation.
+Outputs compact JSON with inline timestamp markers and computed metrics.
 
 Options:
-  --chunk-size <sec>   Chunk duration in seconds (default: 300 = 5 min)
-  --overlap <sec>      Overlap between chunks in seconds (default: 30)
-  --focus <csv>        Optional keywords for AI to prioritize (e.g. "announcement, new outfit")
-  -o, --output <path>  Save output to file (default: stdout)
-  -h, --help           Show help`);
+  --chunk-size <sec>       Chunk duration in seconds (default: 300 = 5 min)
+  --overlap <sec>          Overlap between chunks in seconds (default: 0)
+  --marker-interval <sec>  Inline timestamp marker interval (default: 15)
+  --focus <csv>            Optional keywords for AI to prioritize (e.g. "announcement, new outfit")
+  -o, --output <path>      Save output to file (default: stdout)
+  -h, --help               Show help`);
 }
 
 function parseArgs(argv: string[]): Options | null {
@@ -189,7 +288,8 @@ function parseArgs(argv: string[]): Options | null {
   const opts: Options = {
     inputPath: "",
     chunkSize: 300,
-    overlap: 30,
+    overlap: 0,
+    markerInterval: 15,
     output: "",
     focusKeywords: [],
   };
@@ -204,7 +304,9 @@ function parseArgs(argv: string[]): Options | null {
     if (arg === "--chunk-size") {
       opts.chunkSize = Number(argv[++i] || "300");
     } else if (arg === "--overlap") {
-      opts.overlap = Number(argv[++i] || "30");
+      opts.overlap = Number(argv[++i] || "0");
+    } else if (arg === "--marker-interval") {
+      opts.markerInterval = Number(argv[++i] || "15");
     } else if (arg === "--focus") {
       opts.focusKeywords = (argv[++i] || "")
         .split(",")
@@ -221,6 +323,7 @@ function parseArgs(argv: string[]): Options | null {
   if (opts.chunkSize <= 0) throw new Error("--chunk-size must be positive");
   if (opts.overlap < 0) throw new Error("--overlap must be non-negative");
   if (opts.overlap >= opts.chunkSize) throw new Error("--overlap must be less than --chunk-size");
+  if (opts.markerInterval <= 0) throw new Error("--marker-interval must be positive");
 
   return opts;
 }
@@ -240,7 +343,7 @@ function main() {
   const subs = parseSrt(content);
   if (!subs.length) throw new Error("No subtitle blocks parsed. Check input file format.");
 
-  const chunks = chunkTranscript(subs, opts.chunkSize, opts.overlap);
+  const chunks = chunkTranscript(subs, opts.chunkSize, opts.overlap, opts.markerInterval);
   const totalDurationSec = subs[subs.length - 1].endSec - subs[0].startSec;
 
   const output: ChunkedTranscript = {
@@ -250,6 +353,7 @@ function main() {
     totalDuration: formatTs(totalDurationSec),
     chunkSizeSec: opts.chunkSize,
     overlapSec: opts.overlap,
+    markerIntervalSec: opts.markerInterval,
     chunkCount: chunks.length,
     focusKeywords: opts.focusKeywords,
     chunks,

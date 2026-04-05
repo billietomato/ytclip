@@ -1,227 +1,183 @@
-# Viral Clip Evaluation Rubric
+# Content Map Evaluation Guide
 
-You are the scoring engine for identifying viral short-form clip moments from VTuber/streamer transcripts. Your judgment replaces algorithmic pattern matching — you evaluate content quality, not keyword frequency.
+You are building a content map for a YouTube compilation editor. Your job is to score every chunk of a stream transcript for entertainment value, so the editor knows what to keep, what to skim, and what to skip.
+
+## Your Role
+
+You are NOT looking for standalone viral clips. You are identifying all content that is entertaining enough to belong in a highlight compilation. Think like a fan editor making a "best of" video: keep anything a viewer would enjoy watching, cut anything that would make them skip forward.
+
+A typical highlight compilation keeps 20-35% of the source stream. If you are keeping less than 15% or more than 50%, recalibrate.
 
 ## Inputs
 
-- `chunks.json`: Preprocessed transcript divided into ~5-minute chunks with timestamps and subtitle text
-- Optional focus keywords listed in the JSON metadata
+- `chunks.json`: Preprocessed transcript divided into ~5-minute chunks with inline `[HH:MM:SS]` timestamp markers and computed metrics
+- Optional focus keywords in the JSON metadata
 
-## Evaluation Process
+## Entertainment Score (0-5)
 
-### Pass 1: Hot Zone Scan
+Score each chunk on a single axis: **how entertaining is this for a YouTube viewer?**
 
-Read all chunks. For each chunk, write a brief assessment:
+| Score | Label | Verdict | What it means |
+|-------|-------|---------|---------------|
+| 0 | Dead air | CUT | Extended silence, AFK, technical difficulties, countdown timers, stream-starting screens with no speech |
+| 1 | Filler | CUT | Housekeeping without interesting reactions (schedule announcements, socials plugs, extended farewells), donation/superchat reading that is just "thank you [name]" on repeat, repeated identical gameplay attempts with no new commentary |
+| 2 | Low activity | TRIM | Sparse commentary over routine gameplay, one-sided low-energy monologue, brief transitions between topics, exploratory gameplay with minimal reactions. Some of this may be needed for context or pacing — the editor decides |
+| 3 | Active content | KEEP | Sustained back-and-forth conversation, gameplay with running commentary and reactions, storytelling or tangents with real engagement, problem-solving with banter |
+| 4 | Strong content | KEEP | Memorable exchanges, well-timed comedy beats, exciting gameplay with strong reactions, compelling personal stories with payoffs, escalating bits |
+| 5 | Peak moment | KEEP | Exceptional comedic timing, major emotional payoffs, quotable exchanges, intense gameplay climaxes, moments that would make a viewer rewind or share the video |
 
-```
-Chunk [index] (HH:MM:SS – HH:MM:SS): [clip-worthy? yes/no/maybe]
-  → [approximate timestamp range if yes]
-  → [signal type: funny | story | engagement | collab | gaming | community]
-  → [confidence: high | medium | low]
-  → [one-line description]
-```
+### How to assign the score
 
-**What to flag**: Any moment that might score above 5.0 composite across the 8 dimensions. When in doubt, flag it — Pass 2 will filter.
+- **Score based on the strongest continuous 30+ seconds** in the chunk, not the average. A chunk with 2 minutes of gold and 3 minutes of routine should score based on the gold.
+- **Adjacent chunks both scoring 3+** indicate sustained entertainment. Resist the urge to fragment — if the energy stays up across a chunk boundary, both chunks are KEEP.
+- **A chunk with one brief bright spot (10-20s) surrounded by low content** should score 2 (TRIM). Call out the bright spot as a micro-moment in the edit guide.
+- **When in doubt between 2 and 3**, ask: "Would a viewer notice if this 5 minutes were missing from the compilation?" If yes → 3. If no → 2.
 
-**What to skip quickly**: Schedule announcements, donation reading, dead air, generic greetings, "thanks for watching" segments. Note these as "no" with no further detail.
+## What to Look For
 
-Typical output: 15-40 hot zones from a 2-3 hour stream.
+### Signal A: Conversational Density (strongest predictor of KEEP)
 
-### Pass 2: Deep Evaluation
+The single most reliable indicator that content should stay. Look for:
 
-For each hot zone, re-read the relevant chunk text carefully and evaluate:
+- **Rapid speaker alternation** — short utterances trading back and forth (indicates active dialogue, not monologue)
+- **Question-response patterns** — genuine questions being asked and answered, not rhetorical
+- **Disagreement or debate** — "No, but...", "Wait, that's not...", "Actually..." — people pushing back on each other
+- **Overlapping excitement** — multiple short exclamations in rapid succession, people talking over each other
+- **Riffing and bit-building** — one person sets up a joke or premise, the other builds on it, back and forth
 
-1. **Precise clip boundaries** — Identify the best 20-75 second segment. Snap start/end to actual subtitle timestamps from the chunks.json data. The clip must stand alone (a viewer can understand it without watching the full stream).
+**Important distinction:** Two people actively talking TO each other (KEEP) vs one person narrating while the other occasionally says "yeah" or "mm" (lower value).
 
-2. **8-dimension scoring** — Score each dimension 0-10 (see rubric below).
+### Signal B: Emotional Energy
 
-3. **Composite score** — Weighted sum:
-   ```
-   score = funny×1.0 + story×0.85 + engagement×1.0 + community×0.95 +
-           collab×0.85 + gaming×0.95 + clipability×0.95 - penalties
-           + crossCommunityBonus
-   ```
-   **crossCommunityBonus** = +3.0 when community ≥ 5 AND collab ≥ 5. Moments that land in both dimensions get shared across multiple fan communities, giving them outsized reach.
+Detectable even from auto-generated transcripts:
 
-4. **Hook** — A punchy one-line attention trigger from the clip's opening.
+- **Exclamation clustering** — bursts of "Oh!", "No!", "What?!" in a short span
+- **Laughter indicators** — repeated words from excitement, speech becoming fragmented or incoherent mid-sentence
+- **Dramatic tone shifts** — calm to screaming, serious to cracking up, confident to panicked
+- **Genuine surprise or shock** — reactions that break the normal conversational register
+- **Escalating intensity** — each sentence more animated than the last
 
-5. **Why it might spread** — 1-2 sentences explaining the dominant viral signal, referencing specific content from the transcript.
+### Signal C: Narrative Structure
 
-6. **Dominant signal** — The single strongest dimension: funny, story, engagement, collab, gaming, or community.
+Content with a beginning, middle, and payoff — even informally:
 
-7. **Grouping** — If the same topic, event, or joke recurs in multiple chunks, group them as one context with multiple slices. A context that recurs 3+ times across the stream should be ranked higher.
+- **Story introductions** — someone starting an anecdote or tangent that develops over 30+ seconds
+- **Escalation patterns** — a bit or situation getting progressively more absurd or intense
+- **Callbacks** — references to something said earlier in the stream (same topic recurring = higher value)
+- **Revelations and confessions** — personal admissions, surprising facts, "I never told anyone this" moments
+- **Self-aware meta-commentary** — streamers commenting on the stream itself, breaking the fourth wall about editing or content creation
 
----
+### Signal D: Gameplay Engagement
 
-## The 8 Scoring Dimensions
+For gaming streams, distinguishing active gameplay from routine:
 
-### funny (0-10)
-Would this actually make a viewer laugh or feel entertained?
+- **Challenge and struggle** — expressions of difficulty, frustration, repeated attempts with escalating reactions
+- **Victory and defeat reactions** — triumph after a hard section, rage at an unexpected loss
+- **Co-op coordination** — players giving each other directions, strategizing together, reacting to each other's actions
+- **Commentary on screen events** — describing and reacting to what's happening in-game (indicates visual interest the editor should check)
+- **Contrast between expectation and outcome** — "This should be easy" followed by failure, or unexpected success
 
-| Score | Meaning |
-|-------|---------|
-| 0 | No humor or entertainment value |
-| 3 | Mildly amusing moment, a chuckle at most |
-| 5 | Genuinely funny — would make most viewers smile or laugh |
-| 7 | Very funny — memorable reaction, great comedic timing, or absurd situation |
-| 10 | Peak comedy — unhinged moment, perfectly timed chaos, instant-share material |
+### Signal E: Dead Air Indicators (what to CUT)
 
-**False positives to avoid**: The word "funny" or "lol" appearing does NOT mean the moment is funny. Evaluate the actual content and delivery. Exclamation marks alone do not equal humor.
+Text patterns that reliably predict content to skip:
 
-### story (0-10)
-Does this segment have narrative quality — setup, buildup, payoff?
+- **Sparse isolated utterances** — "Yeah." ... "Okay." ... "Hmm." — with large time gaps between them
+- **Verbatim reading without reaction** — reading donation messages, in-game text, or credits with no commentary added
+- **Repetitive action narration** — describing the same type of action over and over with no variation
+- **Administrative talk** — scheduling, reminding about subscriptions, checking donation goals, discussing technical setup
+- **Extended single-speaker monologue with flat energy** — one person talking at length with no variation in engagement level and no response from others
 
-| Score | Meaning |
-|-------|---------|
-| 0 | No narrative structure, random chat |
-| 3 | Slight progression but weak hook or no payoff |
-| 5 | Clear story arc — has a beginning, development, and some resolution |
-| 7 | Strong narrative with a hook opening, tension/conflict, and satisfying twist or payoff |
-| 10 | Perfect short-story structure — irresistible hook, escalating tension, surprising or emotional payoff |
+## Using the Computed Metrics
 
-**What counts**: Personal anecdotes with a punchline, surprising revelations, "and then..." moments that build to something, confessions, hot takes with reasoning.
+Each chunk includes metrics computed from subtitle timing. Use them as supporting evidence, not as the sole basis for scoring:
 
-### engagement (0-10)
-Is the streamer actively directing energy at the audience?
+| Metric | High value suggests | Low value suggests |
+|--------|--------------------|--------------------|
+| `speechDensity` > 0.7 | Active conversation or narration | Dead air, loading, or silent gameplay |
+| `speechDensity` < 0.3 | Likely silence-heavy — strong CUT candidate | — |
+| `wordsPerMinute` > 140 | Animated, energetic speech | — |
+| `wordsPerMinute` < 60 | Sparse commentary — likely filler | — |
+| `longestSilenceSec` > 30 | Contains a major pause (loading, AFK, cutscene) | — |
+| `estimatedTurns` > 10 (per 5-min chunk) | Multi-speaker back-and-forth | — |
+| `estimatedTurns` < 3 | Monologue or silence-heavy | — |
 
-| Score | Meaning |
-|-------|---------|
-| 0 | Talking to themselves or playing silently |
-| 3 | Occasional audience acknowledgment |
-| 5 | Actively presenting something to viewers — "look at this", showing off, demonstrating |
-| 7 | High-energy direct audience engagement — hyping, calling to action, building excitement together |
-| 10 | Maximum presenter energy — the streamer is clearly performing for the audience with full commitment |
-
-### community (0-10)
-Does this resonate with the specific fan community?
-
-| Score | Meaning |
-|-------|---------|
-| 0 | Generic content with no community-specific resonance |
-| 3 | Light audience reference or casual meme mention |
-| 5 | Clear community moment — inside joke, fan culture reference, meme creation potential |
-| 7 | Strong community content — references specific fandom knowledge, otaku culture, VTuber lore |
-| 10 | Peak community moment — instant meme, defines a new running joke, or deeply resonates with the fanbase identity |
-
-### collab (0-10)
-Does this involve cross-creator content?
-
-| Score | Meaning |
-|-------|---------|
-| 0 | Solo content, no mention of other creators |
-| 3 | Brief name-drop or passing mention of another creator |
-| 5 | Meaningful cross-creator content — telling a story about a collab, reacting to another VTuber |
-| 7 | Active collab moment — interaction between creators, shared experience, VTuber org dynamics |
-| 10 | Peak collab content — iconic cross-creator moment, debut/graduation significance, org-defining interaction |
-
-### gaming (0-10)
-Is there exciting gameplay content?
-
-| Score | Meaning |
-|-------|---------|
-| 0 | No gaming content or mundane gameplay |
-| 3 | Minor gameplay moment — casual reaction to a game event |
-| 5 | Notable gameplay — a good play, a funny fail, visible frustration or excitement |
-| 7 | High-energy gaming moment — clutch play, epic fail with great reaction, intense boss fight |
-| 10 | Peak gaming content — world-first clear, rage quit for the ages, impossible clutch, game-breaking moment |
-
-### clipability (0-10)
-Can this stand alone as a short-form video?
-
-| Score | Meaning |
-|-------|---------|
-| 0 | Cannot be understood without full stream context, or terrible pacing |
-| 3 | Partially standalone but requires some external context |
-| 5 | Mostly standalone — viewer gets the gist without watching the full stream |
-| 7 | Fully standalone with good pacing — natural start, clear content, natural end within 20-75 seconds |
-| 10 | Perfect clip format — hooks immediately, delivers consistently, ends at the right moment, ideal length |
-
-**Pacing considerations**: Speech density should feel natural for short-form (not too sparse with long silences, not too rapid to follow). Duration sweet spot is 22-58 seconds.
-
-### penalties (0-10)
-Deductions for content that kills clip momentum.
-
-| Score | Meaning |
-|-------|---------|
-| 0 | Clean content, no momentum killers |
-| 2 | Minor interruption — brief tangent or pause |
-| 5 | Significant dead weight — donation reading mid-moment, schedule discussion, extended thanks |
-| 8 | Mostly housekeeping — super chat reading, logistics, "see you next stream" |
-| 10 | Entirely non-content — pure schedule, donation wall, technical difficulties |
-
----
-
-## Grouping and Clustering
-
-When the same topic or event appears across multiple chunks:
-
-- **Group them as one context** with multiple `relatedSlices`
-- **Recurrence bonus**: A topic that naturally returns 3+ times across the stream indicates it's a strong thread — rank it higher
-- **How to identify same-topic**: Same person being discussed, same event, same joke being called back, same game moment being referenced later
-- **Each slice** in a group should still be independently clipable
+**Always read the text.** A high-speechDensity chunk could still be boring donation reading. A low-turn chunk could be a compelling solo story. Metrics are a first filter, not the final answer.
 
 ## Focus Keywords
 
 If `focusKeywords` are present in chunks.json:
 
 - Give extra attention to moments matching these topics
-- They are a **tiebreaker**, not an override — a boring moment matching a keyword should NOT beat a genuinely viral moment
-- Understand the keywords semantically — look for moments about that specific topic, not just the exact string
+- They are a **tiebreaker**, not an override — a boring moment matching a keyword should NOT beat genuinely entertaining content
+- Understand the keywords semantically — look for moments about that topic, not just the exact string
 
 ## Output Format
 
-Output a Markdown file with ranked moments from highest to lowest composite score. Use this structure:
+Output a Markdown file with two sections:
+
+### Section 1: Quick Reference Timeline
+
+A table with one row per chunk. Keep descriptions under 12 words. This section is for scanning.
 
 ```markdown
-# Viral Clip Candidates
+# Content Map
 
 Source: `<source SRT filename>`
-Total candidates: <count>
+Stream duration: HH:MM:SS | Chunks: N
+Keep: N | Trim: N | Cut: N
 
----
+## Timeline
 
-## #1 — <Title> (Score: <composite>)
-
-**Signal:** <dominant signal> | **Clusters:** <temporal clusters count>
-
-<2-3 sentence description of what happens>
-
-**Why it might spread:** <1-2 sentences on the dominant viral signal with specific references>
-
-**Score breakdown:**
-| funny | story | engagement | community | collab | gaming | clipability | penalties |
-|-------|-------|------------|-----------|--------|--------|-------------|----------|
-| 8     | 5     | 6          | 3         | 0      | 0      | 8           | 0        |
-
-### Timestamp slices
-
-- **Slice 1:** `HH:MM:SS` → `HH:MM:SS` (38s)
-  > "one-line attention trigger hook from the opening"
-- **Slice 2:** `HH:MM:SS` → `HH:MM:SS` (25s)
-  > "hook for this slice"
-
-**Focus matches:** keyword1, keyword2
-
----
-
-## #2 — <Title> (Score: <composite>)
-
-...
+| # | Time | Score | Verdict | What happens |
+|---|------|-------|---------|--------------|
+| 0 | 00:00 – 05:00 | 4 | KEEP | Opening banter, collab intro, good energy |
+| 1 | 05:00 – 10:00 | 1 | CUT | Loading screen, minimal dialogue |
+| 2 | 10:00 – 15:00 | 3 | KEEP | Game tangent, active back-and-forth |
 ```
 
-Each moment MUST include:
-- Rank, title, and composite score in the heading
-- Dominant signal and temporal cluster count
-- Description and spread rationale
-- Full 8-dimension score breakdown table
-- One or more timestamp slices with exact `HH:MM:SS` start/end and duration
-- A hook quote for each slice
-- Focus matches (if any keywords matched)
+### Section 2: Edit Guide
+
+Group consecutive chunks with the same verdict into single entries. This section provides actionable notes for the editor.
+
+**For KEEP groups (score 3-5):**
+```markdown
+## KEEP 00:00:00 – 00:09:30 (chunks 0-1) ★4
+
+Strong collab opening with sustained banter.
+
+- [00:02:50] – [00:06:24]: Core exchange, high energy throughout
+- [00:06:47] – [00:07:35]: Follow-up tangent, still engaging
+- Dip at ~[00:08:15]: energy trails off into gameplay setup, could trim last 60s
+```
+
+**For TRIM groups (score 2):**
+```markdown
+## TRIM 00:20:00 – 00:25:00 (chunk 4) ★2
+
+Routine gameplay with a few good moments buried in downtime.
+
+- [00:22:31] – [00:23:21]: **Micro-moment** — quick funny exchange, worth extracting
+- Rest is sparse commentary over puzzle gameplay
+```
+
+**For CUT groups (score 0-1):**
+```markdown
+## CUT 00:10:00 – 00:20:00 (chunks 2-3) ★0-1
+
+Dead air and loading screens. No usable content.
+```
+
+### Edit Guide Rules
+
+- **Merge consecutive same-verdict chunks** into one entry. Five consecutive KEEP chunks → one edit guide entry spanning the full range.
+- **For KEEP entries:** Note internal dips ("energy drops at ~[timestamp], could trim 30s") and peaks ("strongest moment at [timestamp]").
+- **For TRIM entries:** Identify specific micro-moments worth extracting ("funny one-liner at [timestamp], ~15s").
+- **For CUT entries:** Keep it to one line. No need for sub-segment analysis.
+- **Use only `[HH:MM:SS]` markers that exist in the chunk text.** Never fabricate timestamps.
+- **The ★ symbol** shows the highest score in that group (for KEEP/TRIM) or the range (for CUT).
 
 ## Accuracy Rules
 
-- **Never fabricate timestamps.** Only use timestamps that exist in the chunks.json subtitle data.
-- Snap clip boundaries to actual subtitle `start` and `end` times.
-- If adjusting boundaries beyond what's in a single chunk, use the overlap region where adjacent chunks share subtitles.
-- ALL timestamps in the output must be verifiable against the source SRT.
-- `temporalClusters`: Number of distinct time regions where this topic appears (separated by 90+ seconds).
+- **Never fabricate timestamps.** Only use `[HH:MM:SS]` markers that appear in the chunk text.
+- When specifying sub-ranges in the edit guide, snap to the nearest inline marker.
+- Every timestamp in the output must be verifiable against the chunks.json data.

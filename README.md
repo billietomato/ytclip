@@ -129,9 +129,9 @@ YouTube 網址
     │  SRT 檔案
     ▼
 ┌───────────────────────────────┐
-│ 第 2 步：找出有趣片段            │  ytclip-2-highlight-moments (AI)
+│ 第 2 步：建立內容地圖            │  ytclip-2-highlight-moments (AI)
 └───────────────────────────────┘
-    │  帶時間戳的 Markdown
+    │  內容地圖 Markdown
     ▼
 ┌───────────────────────────────┐
 │ 第 3 步：剪輯精華               │  你的剪輯軟體
@@ -256,9 +256,9 @@ my-video/
   transcript-en.srt          ← 英文字幕，時間戳和影片同步
 ```
 
-### 第 2 步 — 找出有趣片段（AI）
+### 第 2 步 — 建立內容地圖（AI）
 
-這一步分兩段：先把逐字稿切成區塊，再讓 AI 找出最有趣的片段。
+這一步分兩段：先把逐字稿切成區塊，再讓 AI 逐一評估每個區塊的娛樂價值，產出一份「保留 / 修剪 / 刪除」的內容地圖。
 
 #### 2a. 切分逐字稿
 
@@ -280,12 +280,12 @@ bun ytclip-2-highlight-moments/scripts/clip_candidates.ts \
 
 打開 Claude Code（或你慣用的 AI 代理），在專案目錄下輸入：
 
-> Use ytclip-2-highlight-moments skill. 讀取 `my-video/chunks.json`，按照 `ytclip-2-highlight-moments/references/highlight-evaluation-rubric.md` 中的評分標準，找出前 10-20 個最適合做成 VTuber 粉絲精華的片段。將結果存為 `my-video/highlight-moments.md`。
+> Use ytclip-2-highlight-moments skill. 讀取 `my-video/chunks.json`，按照評分標準為每個區塊打分（0-5），標記 KEEP / TRIM / CUT。將內容地圖存為 `my-video/content-map.md`。
 
 AI 會：
-1. 先快速掃過所有區塊，找出粉絲最可能想剪、想轉、想分享的亮點
-2. 從 8 個維度深入評估每個候選片段（搞笑、故事性、互動、社群、聯動、遊戲、可剪輯性、扣分項）
-3. 輸出一份附上精確時間戳的 Markdown 排名清單
+1. 逐一評估每個區塊的娛樂價值（0-5 分）
+2. 標記 KEEP（保留）、TRIM（修剪）、CUT（刪除）
+3. 輸出一份帶時間戳的內容地圖，包含總覽時間軸和剪輯指引
 
 現在你的資料夾長這樣：
 ```
@@ -293,12 +293,12 @@ my-video/
   raw-video.mp4
   transcript-en.srt
   chunks.json                ← 預處理後的區塊
-  highlight-moments.md       ← 排名後的精華候選片段
+  content-map.md             ← 內容地圖（KEEP / TRIM / CUT）
 ```
 
 ### 第 3 步 — 剪輯你的精華（自己來！）
 
-打開剪輯軟體，把這份候選清單整理成你真正想發出去的版本。
+打開剪輯軟體，參考內容地圖剪出你的精華。
 
 #### 匯入影片
 
@@ -310,9 +310,9 @@ my-video/
 
 #### 剪輯片段
 
-1. 打開 `highlight-moments.md` 查看時間戳與說明
-2. 在時間軸上跳到對應的時間點
-3. 切出你想保留的反應、公布、笑點、唱段、互動或情緒重點
+1. 打開 `content-map.md` 查看時間軸總覽和剪輯指引
+2. 從 KEEP 區段開始，在時間軸上跳到對應的時間點
+3. 切出你想保留的反應、公布、笑點、唱段、互動或情緒重點；參考 TRIM 區段找出值得提取的微亮點
 4. 按照你想要的節奏排列片段
 5. 微調長度、轉場與整體節奏
 
@@ -336,7 +336,7 @@ my-video/
   raw-video.mp4
   transcript-en.srt
   chunks.json
-  highlight-moments.md
+  content-map.md
   export.xml                 ← 你的剪輯決策
 ```
 
@@ -490,7 +490,7 @@ my-video/
   raw-video.mp4                    原始直播錄影
   transcript-en.srt                字幕原稿（完整直播時間軸）
   chunks.json                      給 AI 評估的逐字稿區塊
-  highlight-moments.md             排名後的精華候選片段
+  content-map.md                   內容地圖（KEEP / TRIM / CUT）
   export.xml                       剪輯時間軸匯出
   clip_manifest.json               解析後的剪輯時間資料
   transcript-en-remapped.srt       對齊成品的英文字幕
@@ -505,7 +505,7 @@ my-video/
 ytclip/
 ├── ytclip-1-transcript/                 從 YouTube 抓字幕成 SRT
 │   └── scripts/main.ts
-├── ytclip-2-highlight-moments/          AI 找出有趣片段 → Markdown
+├── ytclip-2-highlight-moments/          AI 建立內容地圖 → Markdown
 │   ├── scripts/clip_candidates.ts
 │   └── references/
 │       └── highlight-evaluation-rubric.md
@@ -525,19 +525,19 @@ ytclip/
 
 ## 評分參考
 
-第 2 步中的 AI 會從 8 個維度評估逐字稿區塊，篩出最有趣、最值得翻譯和分享的片段：
+第 2 步中的 AI 會用 0-5 分評估每個逐字稿區塊的娛樂價值，再標記 KEEP / TRIM / CUT：
 
-| 維度 | 偵測內容 |
-|------|----------|
-| **funny（搞笑）** | 喜劇品質、反應強度、笑點節奏、荒謬程度 |
-| **story（故事性）** | 敘事鉤子、鋪陳/發展/收尾、反轉、出人意料的爆料 |
-| **engagement（互動）** | 實況主主動表演、把精力導向觀眾 |
-| **community（社群）** | 粉絲社群共鳴、內梗、迷因潛力、宅文化 |
-| **collab（聯動）** | 跨頻道合作、VTuber 互動、箱內動態 |
-| **gaming（遊戲）** | 神操作、史詩級失誤、暴怒時刻、打 Boss |
-| **clipability（可剪輯性）** | 片段獨立性、節奏感、自然的起止點 |
-| **penalties（扣分項）** | 日常閒聊、讀 SC、冷場、排程公告 |
+| 分數 | 標籤 | 判定 | 涵蓋內容 |
+|------|------|------|----------|
+| 0 | 空窗 | CUT | 靜音、AFK、技術問題、倒數計時畫面 |
+| 1 | 填充 | CUT | 唸 SC 無反應、排程公告、重複遊玩無新解說 |
+| 2 | 低活躍 | TRIM | 零星解說、單方面低能量對話、過場片段 |
+| 3 | 活躍內容 | KEEP | 持續對話、遊玩中有反應和解說、有趣離題 |
+| 4 | 強力亮點 | KEEP | 記憶點交流、喜劇節奏、刺激遊玩、精彩故事 |
+| 5 | 巔峰時刻 | KEEP | 神級節奏、情緒高潮、金句交換、讓人想倒帶的瞬間 |
+
+AI 會偵測五類信號：**對話密度**、**情緒能量**、**敘事結構**、**遊戲投入度**、以及**冷場指標**（扣分）。
 
 完整評分標準請見 `ytclip-2-highlight-moments/references/highlight-evaluation-rubric.md`。
 
-> AI 的評分結果僅供參考。最好的片段永遠是你親眼看完直播後、發自內心想分享的那一刻。做個有愛的烤肉man，讓 VTuber 文化走得更遠！
+> AI 的內容地圖僅供參考。最好的片段永遠是你親眼看完直播後、發自內心想分享的那一刻。做個有愛的烤肉man，讓 VTuber 文化走得更遠！

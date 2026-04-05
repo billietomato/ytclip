@@ -129,10 +129,10 @@ YouTube URL
     │  SRT file
     ▼
 ┌───────────────────────────────┐
-│ Step 2: Find interesting      │  ytclip-2-highlight-moments (AI)
-│         moments               │
+│ Step 2: Build content map     │  ytclip-2-highlight-moments (AI)
+│                               │
 └───────────────────────────────┘
-    │  Markdown with timestamps
+    │  Content map Markdown
     ▼
 ┌───────────────────────────────┐
 │ Step 3: Edit clips            │  Your video editor
@@ -257,9 +257,9 @@ my-video/
   transcript-en.srt          ← English subtitles, timestamps synced with video
 ```
 
-### Step 2 — Find Interesting Moments (AI)
+### Step 2 — Build Content Map (AI)
 
-This is a two-part pass: first a script chunks the transcript, then an AI agent identifies the most interesting moments for a fanmade clip.
+This is a two-part pass: first a script chunks the transcript, then an AI agent scores each chunk for entertainment value and produces a KEEP / TRIM / CUT content map.
 
 #### 2a. Chunk the transcript
 
@@ -281,12 +281,12 @@ bun ytclip-2-highlight-moments/scripts/clip_candidates.ts \
 
 Open Claude Code (or your AI agent) in this project directory and ask:
 
-> Use ytclip-2-highlight-moments skill. Read `my-video/chunks.json` and identify the top 10-20 clip-worthy moments for a fanmade VTuber highlight following the rubric in `ytclip-2-highlight-moments/references/highlight-evaluation-rubric.md`. Save the output as `my-video/highlight-moments.md`.
+> Use ytclip-2-highlight-moments skill. Read `my-video/chunks.json` and score each chunk (0-5) following the rubric. Mark each as KEEP / TRIM / CUT. Save the content map as `my-video/content-map.md`.
 
 The AI will:
-1. Sweep the transcript for moments fans are likely to clip, quote, or share
-2. Score each candidate across 8 dimensions (humor, story, engagement, community, collabs, gaming, clipability, penalties)
-3. Produce a ranked Markdown shortlist with exact timestamps
+1. Score each chunk's entertainment value (0-5)
+2. Mark each as KEEP (include), TRIM (skim for micro-moments), or CUT (skip)
+3. Produce a Markdown content map with a timeline overview and an edit guide with specific timestamp ranges
 
 Your folder now looks like:
 ```
@@ -294,12 +294,12 @@ my-video/
   raw-video.mp4
   transcript-en.srt
   chunks.json                ← Preprocessed chunks
-  highlight-moments.md       ← Ranked clip candidates with timestamps
+  content-map.md             ← Content map (KEEP / TRIM / CUT)
 ```
 
 ### Step 3 — Edit Your Clips (DIY!)
 
-Open your video editor and turn the shortlist into the cuts you actually want to post.
+Open your video editor and use the content map to guide your edits.
 
 #### Import the video
 
@@ -311,9 +311,9 @@ Open your video editor and turn the shortlist into the cuts you actually want to
 
 #### Cut your clips
 
-1. Open `highlight-moments.md` and review the timestamps and notes
-2. Jump to each moment in your editor's timeline
-3. Cut the parts you want to keep, such as reactions, reveals, jokes, announcements, songs, or emotional beats
+1. Open `content-map.md` and review the timeline overview and edit guide
+2. Start with the KEEP sections — jump to each in your editor's timeline
+3. Cut the parts you want to keep, such as reactions, reveals, jokes, announcements, songs, or emotional beats; check TRIM sections for micro-moments worth extracting
 4. Arrange the clips on your timeline in the order you want
 5. Tighten pacing and transitions as needed
 
@@ -337,7 +337,7 @@ my-video/
   raw-video.mp4
   transcript-en.srt
   chunks.json
-  highlight-moments.md
+  content-map.md
   export.xml                 ← Your edit decisions
 ```
 
@@ -491,7 +491,7 @@ my-video/
   raw-video.mp4                    Original stream archive
   transcript-en.srt                Source subtitles (full-stream timeline)
   chunks.json                      Transcript chunks for AI review
-  highlight-moments.md             Ranked clip shortlist with timestamps
+  content-map.md                   Content map (KEEP / TRIM / CUT)
   export.xml                       Editor timeline export
   clip_manifest.json               Parsed cut timing data
   transcript-en-remapped.srt       English subtitles aligned to your cut
@@ -506,7 +506,7 @@ my-video/
 ytclip/
 ├── ytclip-1-transcript/                 Pull YouTube subtitles as SRT
 │   └── scripts/main.ts
-├── ytclip-2-highlight-moments/          AI finds interesting moments → Markdown
+├── ytclip-2-highlight-moments/          AI builds content map → Markdown
 │   ├── scripts/clip_candidates.ts
 │   └── references/
 │       └── highlight-evaluation-rubric.md
@@ -526,19 +526,19 @@ ytclip/
 
 ## Scoring Reference
 
-The AI in Step 2 scores transcript chunks across 8 dimensions to surface the moments fans are most likely to clip, translate, and share:
+The AI in Step 2 scores each transcript chunk on a 0-5 entertainment scale and marks it KEEP / TRIM / CUT:
 
-| Dimension | What it detects |
-|-----------|-----------------|
-| **funny** | Comedy quality, reaction intensity, comedic timing, absurdity |
-| **story** | Narrative hooks, setup/buildup/payoff, twists, surprising revelations |
-| **engagement** | Streamer actively presenting, directing energy at audience |
-| **community** | Fan community resonance, inside jokes, meme potential, otaku culture |
-| **collab** | Cross-creator content, VTuber interactions, org dynamics |
-| **gaming** | Clutch plays, epic fails, rage moments, boss fights |
-| **clipability** | Standalone coherence, pacing, natural boundaries for short-form |
-| **penalties** | Housekeeping chatter, donation reading, dead air, schedule talk |
+| Score | Label | Verdict | What it covers |
+|-------|-------|---------|----------------|
+| 0 | Dead air | CUT | Silence, AFK, technical issues, countdown screens |
+| 1 | Filler | CUT | Donation reading with no reactions, schedule talk, repeated gameplay with no new commentary |
+| 2 | Low activity | TRIM | Sparse commentary, one-sided low-energy talk, transitions |
+| 3 | Active content | KEEP | Sustained conversation, gameplay with reactions and commentary, fun tangents |
+| 4 | Strong content | KEEP | Memorable exchanges, comedy beats, exciting gameplay, compelling stories |
+| 5 | Peak moment | KEEP | Exceptional timing, emotional payoffs, quotable exchanges, rewind-worthy moments |
+
+The AI detects five signal categories: **conversational density**, **emotional energy**, **narrative structure**, **gameplay engagement**, and **dead air indicators** (negative).
 
 See `ytclip-2-highlight-moments/references/highlight-evaluation-rubric.md` for the complete scoring criteria.
 
-> The AI scoring results are for reference only. The best clips are always the moments you discover after watching the full stream — the ones you genuinely want to share. Be a clipper with heart, and help VTubing culture reach even further!
+> The content map is for reference only. The best clips are always the moments you discover after watching the full stream — the ones you genuinely want to share. Be a clipper with heart, and help VTubing culture reach even further!
