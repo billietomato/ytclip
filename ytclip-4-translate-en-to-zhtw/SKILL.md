@@ -37,7 +37,7 @@ Present the list to the user and ask:
 
 Proceed only after the user confirms the glossary. If the user says to skip, proceed without it.
 
-### Step 2: Chunked Translation
+### Step 2: Translation
 
 Read the input SRT file and translate following all rules in `references/zh-tw-localization.md`.
 
@@ -47,10 +47,13 @@ If the content is clearly genre-specific, load extra references before translati
 
 Do not load those genre-specific references for unrelated content.
 
-**Translate in chunks of 5–10 blocks at a time**, not block-by-block. This provides enough context to:
-- Produce natural Chinese phrasing across block boundaries
-- Remove filler words cleanly
-- Avoid awkward phrase splits between blocks
+**Translate the entire file in a single thinking pass, then write the complete output in one Write call.** Do not translate a few blocks, write them, then translate more — that creates dozens of slow round-trips. For very large files (500+ blocks), write in two halves at most.
+
+When translating each block, consider surrounding blocks for natural cross-boundary phrasing, filler removal, and avoiding awkward splits — but do this as part of one continuous pass, not as separate "chunks."
+
+**While translating, also apply block splitting inline** (Step 3 rules): if a translated block exceeds ~15 characters, split it at natural phrase boundaries and distribute the time range evenly. This avoids a separate re-scan pass after translation.
+
+Do not re-read the input file if it is already in context. Do not web-search for Taiwan terms you already know; ask the user directly if unsure.
 
 Key rules:
 - Taiwan Traditional Chinese, not mainland Chinese
@@ -72,18 +75,17 @@ Key rules:
   - "Oh my god" → 喔天啊 / 我的天啊 / 天啊 / 天哪
   - "spoiler" / "no spoilers" → 爆雷 / 不爆雷
 
-### Step 3: Block Splitting
+### Step 3: Block Splitting (applied inline during Step 2)
 
-After translation, split long blocks so each block contains **one short natural phrase** (~8 characters target, max ~15).
+Block splitting is done during translation, not as a separate pass. Each translated block should contain **one short natural phrase** (~8 characters target, max ~15).
 
-For each block that is too long:
-1. Split at natural Chinese phrase boundaries (after particles, clause breaks, commas).
-2. Distribute the original block's time range across the new sub-blocks proportionally by character count.
-3. Renumber all blocks sequentially.
+Rules:
+- Split at natural Chinese phrase boundaries (after particles, clause breaks, commas).
+- Distribute the original block's time range across sub-blocks evenly. Only adjust where needed to ensure `end > start` and no overlaps.
+- Renumber all blocks sequentially in the final output.
+- Do not split blocks that are already short enough.
 
-Do not split blocks that are already short enough.
-
-**Timestamp validation**: After splitting, verify every block has `end > start`. If any input block has an invalid timestamp (end ≤ start), fix it by setting end = start + (character_count × 80ms, minimum 800ms), capped at the next block's start time. Use standard SRT timestamp format: `HH:MM:SS,mmm` where milliseconds are always exactly 3 digits (000–999).
+**Timestamp validation**: every block must have `end > start`. If any input block has an invalid timestamp (end ≤ start), fix it by setting end = start + (character_count × 80ms, minimum 800ms), capped at the next block's start time. Use standard SRT timestamp format: `HH:MM:SS,mmm` where milliseconds are always exactly 3 digits (000–999).
 
 ### Step 4: Save
 
