@@ -134,27 +134,50 @@ function parseSequence(xml: string, trackIndex: number): ClipManifest {
     const frameRate = resolveFrameRate(sequenceBlock);
     const fpsDiv = frameRate;
 
+    // Parse transitions so we can resolve -1 clip boundaries (cross dissolve overlaps)
+    const transitionItems = extractAllBlocks(selectedTrack, "transitionitem");
+    const transitions = transitionItems
+      .flatMap(item => {
+        const start = parseFrameValue(item, "start");
+        const end = parseFrameValue(item, "end");
+        if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || end < 0) return [];
+        return [{ start, end, mid: Math.floor((start + end) / 2) }];
+      })
+      .sort((a, b) => a.start - b.start);
+
     const clips: ClipEntry[] = [];
     for (const clipItem of clipItems) {
-      const sequenceInFrame = parseFrameValue(clipItem, "start");
-      const sequenceOutFrame = parseFrameValue(clipItem, "end");
+      let sequenceInFrame = parseFrameValue(clipItem, "start");
+      let sequenceOutFrame = parseFrameValue(clipItem, "end");
       const sourceInFrame = parseFrameValue(clipItem, "in");
       const sourceOutFrame = parseFrameValue(clipItem, "out");
 
       if (
-        !Number.isFinite(sequenceInFrame) ||
-        !Number.isFinite(sequenceOutFrame) ||
         !Number.isFinite(sourceInFrame) ||
-        !Number.isFinite(sourceOutFrame)
+        !Number.isFinite(sourceOutFrame) ||
+        sourceInFrame < 0 ||
+        sourceOutFrame < 0
       ) {
         continue;
       }
 
+      // Resolve -1 sequence boundaries caused by dissolve/transition overlaps.
+      // end=-1 means this clip extends into a transition; use the transition midpoint.
+      if (sequenceOutFrame === -1 && Number.isFinite(sequenceInFrame) && sequenceInFrame >= 0) {
+        const t = transitions.find(tr => tr.start >= sequenceInFrame);
+        if (t) sequenceOutFrame = t.mid;
+      }
+      // start=-1 means this clip starts from within a transition; use the transition midpoint.
+      if (sequenceInFrame === -1 && Number.isFinite(sequenceOutFrame) && sequenceOutFrame >= 0) {
+        const t = [...transitions].reverse().find(tr => tr.end <= sequenceOutFrame);
+        if (t) sequenceInFrame = t.mid;
+      }
+
       if (
+        !Number.isFinite(sequenceInFrame) ||
+        !Number.isFinite(sequenceOutFrame) ||
         sequenceInFrame < 0 ||
-        sequenceOutFrame < 0 ||
-        sourceInFrame < 0 ||
-        sourceOutFrame < 0
+        sequenceOutFrame < 0
       ) {
         continue;
       }
