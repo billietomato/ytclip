@@ -136,6 +136,7 @@ Key rules:
 - Translate short transition words that carry structural meaning in storytelling (and → 然後, so → 所以, but → 但是, you know → 你知道嗎, apparently → 看起來). Do not blank these into `⋯`
 - Use `⋯` for pauses and trailing off
 - Keep people names in original language
+- Always use `你` for second-person pronouns — never use `妳` regardless of the addressee's gender
 - Apply the confirmed glossary from Step 1
 - Slang mappings (see reference for full list):
   - "fucking" → 他喵的 / 喵的
