@@ -5,7 +5,7 @@
 
 Make fanmade VTuber clips from YouTube VODs with translated subtitles, assisted by AI agent skills.
 
-This workflow helps you pull streams, spot the most interesting moments, edit faster, remap subtitles to your cut, translate them to Traditional Chinese, proofread for typos, and convert to Simplified Chinese — so your oshi's words can travel further with love, passion, and efficiency.
+This workflow helps you pull streams, spot the most interesting moments, edit faster, transcribe your edited audio locally, translate the subtitles to Traditional Chinese, proofread for typos, and convert to Simplified Chinese — so your oshi's words can travel further with love, passion, and efficiency.
 
 ## What You'll Need
 
@@ -78,11 +78,24 @@ You need one of the following to edit your clips:
 
 | Editor | Platform | Export Format |
 |--------|----------|---------------|
-| **Adobe Premiere Pro** | Mac / Windows | Final Cut Pro XML |
-| **Final Cut Pro** | Mac | FCPXML |
-| **DaVinci Resolve** | Mac / Windows / Linux | Final Cut Pro 7 XML |
+| **Adobe Premiere Pro** | Mac / Windows | WAV / MP3 / MP4 |
+| **Final Cut Pro** | Mac | WAV / MP3 / MP4 |
+| **DaVinci Resolve** | Mac / Windows / Linux | WAV / MP3 / MP4 |
 
-You do not need pro editor skills. If you can import footage, cut a timeline, and export XML and video, you are set.
+You do not need pro editor skills. If you can import footage, cut a timeline, and export audio and video, you are set.
+
+### 5. Local transcription (Apple Silicon Mac)
+
+The bundled backend requires Apple Silicon macOS. Intel Macs, Windows, and Linux need a different backend. Install the tools with Homebrew:
+
+```bash
+brew install uv ffmpeg
+uv --version
+ffmpeg -version
+ffprobe -version
+```
+
+`uv run --script` manages Python 3.11 and the pinned `mlx-whisper` dependency automatically; no separate `uv tool install mlx-whisper` is needed. The first run downloads model weights. Audio processing stays local.
 
 ---
 
@@ -112,6 +125,8 @@ mkdir my-video
 
 ## The Pipeline at a Glance
 
+README steps include manual editing and export; skill numbers identify the six automated skills. README Step 4 therefore uses `ytclip-3-audio-to-srt`.
+
 ```
 YouTube URL
     │
@@ -137,14 +152,14 @@ YouTube URL
 ┌───────────────────────────────┐
 │ Step 3: Edit clips            │  Your video editor
 └───────────────────────────────┘
-    │  Edited timeline + XML export
+    │  Edited audio export
     ▼
 ─── Phase 2: Translate & Export zh-TW ──────────
     │
 ┌───────────────────────────────┐
-│ Step 4: Remap subtitles       │  ytclip-3-remap-srt
+│ Step 4: Transcribe audio      │  ytclip-3-audio-to-srt (AI)
 └───────────────────────────────┘
-    │  Remapped SRT
+    │  Transcribed SRT
     ▼
 ┌───────────────────────────────┐
 │ Step 5: Translate EN → zh-TW  │  ytclip-4-translate-en-to-zhtw (AI)
@@ -209,7 +224,7 @@ yt-dlp --download-sections "*01:00:00-02:30:00" \
 
 ### Step 1 — Download the Transcript
 
-Pull the video's subtitles from YouTube as an SRT file. This becomes the base for scoring, clipping, and translation. **The transcript's time range must match the video so they stay in sync when imported into your editor.**
+Pull the video's subtitles from YouTube as an SRT file. Use this transcript for finding highlights and editing. Step 4 generates fresh subtitles from the edited audio for translation. **The transcript's time range must match the video so they stay in sync when imported into your editor.**
 
 **A) Download the full transcript** (to match the full stream):
 
@@ -319,72 +334,49 @@ Open your video editor and use the content map to guide your edits.
 
 > **Do not add subtitles yet** — wait until Phase 2 when the translated subtitles are ready.
 
-#### Export the project XML
+#### Export the edited audio
 
-Export your timeline as an XML file so the next step can read the edit you made.
-
-| Editor | How to export XML |
-|--------|-------------------|
-| **Premiere Pro** | File > Export > Final Cut Pro XML |
-| **Final Cut Pro** | File > Export XML |
-| **DaVinci Resolve** | File > Export > Timeline > FCP 7 XML (or FCPXML) |
-
-Save as `my-video/export.xml`.
-
-Your folder now looks like:
-```
-my-video/
-  raw-video.mp4
-  transcript-en.srt
-  chunks.json
-  content-map.md
-  export.xml                 ← Your edit decisions
-```
+Export the entire edited sequence as `my-video/edited-audio.wav` (MP3 or an edited MP4 also works). Start at timeline zero and preserve leading silence and gaps so subtitle timestamps match the finished video. XML export is no longer needed.
 
 ---
 
 ## Phase 2: Translate & Export zh-TW
 
-### Step 4 — Remap Subtitles to Your Edit
+### Step 4 — Transcribe Edited Audio Locally (AI)
 
-Your original SRT still matches the full stream. This step remaps it to the timing of your edited clip.
-
-#### 4a. Parse the XML into a clip manifest
+Use `ytclip-3-audio-to-srt` to generate source-language subtitles from the edited audio. The bundled backend uses MLX Whisper large-v3-turbo on Apple Silicon macOS. Install `uv` and FFmpeg first; the first run downloads Python dependencies and the model, then transcription runs locally.
 
 ```bash
-bun ytclip-3-remap-srt/scripts/parse_cuts.ts \
-  my-video/export.xml \
-  --track 0 \
-  -o my-video/clip_manifest.json
+uv run --script ytclip-3-audio-to-srt/scripts/transcribe.py \
+  my-video/edited-audio.wav --language en \
+  -o my-video/edited-en.srt
 ```
 
-> **Note:** `--track 0` means the first video track. If your clips are on a different track, change the number.
+Or ask your agent:
 
-#### 4b. Remap the SRT
+> Use ytclip-3-audio-to-srt. Transcribe `my-video/edited-audio.wav` in English to `my-video/edited-en.srt`.
+
+The script also writes `edited-en.report.json` with raw segments and review warnings. Existing outputs are protected. For repetition or timing problems, retry once with `--chunk-seconds 30` and a new output filename. Chunks prefer low-volume pauses and retain original offsets; this is not speech detection. Review gaps, names, and timing before translation. Other platforms need a different local backend.
+
+#### Retry with smaller chunks
+
+For repetition or timing problems, retry once with a fresh output name:
 
 ```bash
-bun ytclip-3-remap-srt/scripts/remap_srt.ts \
-  my-video/transcript-en.srt \
-  my-video/clip_manifest.json \
-  -o my-video/transcript-en-remapped.srt \
-  --gap 50
+uv run --script ytclip-3-audio-to-srt/scripts/transcribe.py \
+  my-video/edited-audio.wav --language en --chunk-seconds 30 \
+  -o my-video/edited-en.chunked.srt
 ```
 
-This keeps only the subtitle lines that survive the cut and shifts their timestamps to match your final sequence.
+This produces `edited-en.chunked.srt` and `edited-en.chunked.report.json`. Default `--chunk-seconds 0` processes the whole file; nonzero values must be at least 10 seconds. Cuts prefer pauses but may split speech. Review chunk boundaries against the audio.
 
-Your folder now looks like:
-```
-my-video/
-  ...(previous files)
-  clip_manifest.json         ← Parsed clip timing
-  transcript-en-remapped.srt ← Subtitles matching your edit
-```
+Set `--language` to the spoken language, or omit it to detect once. Step 5 handles English; other languages need a corresponding translation workflow. Listen to opening, middle, ending, and flagged intervals before translation. Valid SRT syntax does not prove accuracy. If you select the chunked result, use that SRT as Step 5's input.
 
 ### Step 5 — Translate Subtitles EN → zh-TW (AI)
 
-Translate the remapped English subtitles into Traditional Chinese (Taiwan). Open Claude Code (or your AI agent) and ask:
+Translate the transcribed English subtitles into Traditional Chinese (Taiwan). Open Claude Code (or your AI agent) and ask:
 
-> Use ytclip-4-translate-en-to-zhtw skill. Translate `my-video/transcript-en-remapped.srt` to zh-TW following the localization rules in `ytclip-4-translate-en-to-zhtw/references/zh-tw-localization.md`. Save as `my-video/transcript-zhtw-remapped.srt`.
+> Use ytclip-4-translate-en-to-zhtw skill. Translate `my-video/edited-en.srt` to zh-TW following the localization rules in `ytclip-4-translate-en-to-zhtw/references/zh-tw-localization.md`. Save as `my-video/edited-zhtw.srt`.
 
 The AI reads your SRT directly. The localization rules handle Taiwan fan terminology, in-jokes, and community tone.
 
@@ -400,7 +392,7 @@ Import the translated zh-TW SRT into your video editor and review each line agai
 
 Play through and check:
 
-1. **Fine-tune timing** — some lines may be a few frames off after the automated remap; nudge them into place
+1. **Fine-tune timing** — check recognized start/end times and line breaks against the audio
 2. **Refine wording** — AI translations may not perfectly match your tone; this is your last chance to polish
 3. **Check for overlap** — make sure subtitles don't cover important visuals
 
@@ -462,13 +454,17 @@ bun ytclip-6-convert-tc-to-sc/scripts/convert.ts \
 
 > **Note:** This is a pure character conversion — it does NOT adapt terminology or phrasing for mainland usage. If you need mainland localization (e.g. changing 影片 to 视频), that requires a separate pass.
 
+The full skill includes that localization pass while preserving subtitle numbers and timestamps:
+
+> Use ytclip-6-convert-tc-to-sc. Convert `my-video/transcript-zhtw-final.srt` to Simplified Chinese and localize mainland terminology. Save as `my-video/transcript-zhcn-final.srt`.
+
 ### Step 10 — Review SC & Export
 
 Import the Simplified Chinese SRT into your editor for a quick visual check, then export.
 
 #### Import the SC SRT
 
-Use the same import method as Step 7 to import `my-video/transcript-zhcn-final.srt`. Remove or disable the zh-TW caption track first.
+Use the same import method as Step 6 to import `my-video/transcript-zhcn-final.srt`. Remove or disable the zh-TW caption track first.
 
 #### Quick review
 
@@ -492,10 +488,10 @@ my-video/
   transcript-en.srt                Source subtitles (full-stream timeline)
   chunks.json                      Transcript chunks for AI review
   content-map.md                   Content map (KEEP / TRIM / CUT)
-  export.xml                       Editor timeline export
-  clip_manifest.json               Parsed cut timing data
-  transcript-en-remapped.srt       English subtitles aligned to your cut
-  transcript-zhtw-remapped.srt     AI-translated zh-TW subtitles
+  edited-audio.wav                Audio exported from the edited timeline
+  edited-en.report.json           Recognition details and review warnings
+  edited-en.srt                   English subtitles aligned to your cut
+  edited-zhtw.srt                 AI-translated zh-TW subtitles
   transcript-zhtw-final.srt        Final zh-TW subtitles (manual edit + AI proofreading)
   transcript-zhcn-final.srt        Simplified Chinese subtitles (TC→SC conversion)
 ```
@@ -510,16 +506,14 @@ ytclip/
 │   ├── scripts/clip_candidates.ts
 │   └── references/
 │       └── highlight-evaluation-rubric.md
-├── ytclip-3-remap-srt/                  Remap subtitles to edited cuts
-│   └── scripts/
-│       ├── parse_cuts.ts
-│       └── remap_srt.ts
+├── ytclip-3-audio-to-srt/               Transcribe edited audio to SRT
+│   └── scripts/transcribe.py
 ├── ytclip-4-translate-en-to-zhtw/       AI translate English subtitles → zh-TW
 │   ├── SKILL.md
 │   └── references/zh-tw-localization.md
 ├── ytclip-5-proofread-zhtw/             AI proofread zh-TW subtitles for typos
 │   └── SKILL.md
-├── ytclip-6-convert-tc-to-sc/           Convert TC → SC (direct character conversion)
+├── ytclip-6-convert-tc-to-sc/           Convert TC → SC + mainland localization
 │   └── scripts/convert.ts
 └── readme-translations/                 Localized README files
 ```

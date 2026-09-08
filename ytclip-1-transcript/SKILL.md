@@ -7,6 +7,8 @@ description: "Step 1 of ytclip pipeline: Download full YouTube transcript as SRT
 
 Download a YouTube video's transcript and export it as an SRT subtitle file.
 
+In the README workflow, this is Step 1: obtain source captions for highlight selection and editing. After the edit, use `ytclip-3-audio-to-srt` on the edited audio to generate subtitles for translation; the original captions still follow the source timeline.
+
 ## Runtime
 
 Resolve `BUN_X` in this order:

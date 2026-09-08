@@ -1,6 +1,6 @@
 ---
 name: ytclip-4-translate-en-to-zhtw
-description: "Step 5 of ytclip pipeline: AI agent translates SRT subtitles from English to Traditional Chinese (Taiwan community style). Input: English SRT file. Output: Translated SRT file in zh-TW."
+description: "Skill 4 of ytclip (README Step 5): AI agent translates SRT subtitles from English to Traditional Chinese (Taiwan community style). Input: English SRT file. Output: Translated SRT file in zh-TW."
 ---
 
 # ytclip-4-translate-en-to-zhtw
@@ -16,6 +16,8 @@ Translate SRT subtitle files from English to Traditional Chinese using Taiwan co
 ## Input
 
 - An SRT subtitle file in English
+
+For the edited-video workflow, use the reviewed `edited-en.srt` from `ytclip-3-audio-to-srt` (or the chosen retry SRT), not the original full-stream captions. Review recognition warnings against the audio before translation. The JSON report is supporting evidence, not the translation input.
 
 ## Output
 

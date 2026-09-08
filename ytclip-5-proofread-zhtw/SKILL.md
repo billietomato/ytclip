@@ -1,6 +1,6 @@
 ---
 name: ytclip-5-proofread-zhtw
-description: "Step 6 of ytclip pipeline: AI agent proofreads a zh-TW SRT file and reports confirmed typos. Input: zh-TW SRT file. Output: list of confirmed typos with line numbers."
+description: "Skill 5 of ytclip (README Step 7): AI agent proofreads a zh-TW SRT file and reports confirmed typos. Input: zh-TW SRT file. Output: list of confirmed typos with line numbers."
 ---
 
 # ytclip-5-proofread-zhtw
@@ -10,6 +10,8 @@ Proofread a Traditional Chinese (Taiwan) SRT subtitle file and report confirmed 
 ## Input
 
 - An SRT subtitle file in Traditional Chinese (Taiwan)
+
+In the README workflow, use `transcript-zhtw-final.srt` exported after manual subtitle review in Step 6. This typo pass does not verify speech-recognition accuracy or subtitle timing.
 
 ## Output
 

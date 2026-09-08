@@ -5,7 +5,7 @@
 
 使用 AI Agent Skills 輔助，從 YouTube 直播錄影剪出粉絲向 VTuber 烤肉精華，配上翻譯字幕。
 
-這套工作流會幫你抓直播、找出有趣片段、加快剪輯流程、把字幕精準對齊成品，翻譯成繁體中文、校對錯字、再轉成簡體中文，讓推的話語能帶著愛、熱情和效率傳到更遠的地方。
+這套工作流會幫你抓直播、找出有趣片段、加快剪輯流程、從剪輯後的音訊產生字幕，翻譯成繁體中文、校對錯字、再轉成簡體中文，讓推的話語能帶著愛、熱情和效率傳到更遠的地方。
 
 ## 事前準備
 
@@ -78,11 +78,24 @@ bun --version
 
 | 軟體 | 平台 | 匯出格式 |
 |------|------|----------|
-| **Adobe Premiere Pro** | Mac / Windows | Final Cut Pro XML |
-| **Final Cut Pro** | Mac | FCPXML |
-| **DaVinci Resolve** | Mac / Windows / Linux | Final Cut Pro 7 XML |
+| **Adobe Premiere Pro** | Mac / Windows | WAV / MP3 / MP4 |
+| **Final Cut Pro** | Mac | WAV / MP3 / MP4 |
+| **DaVinci Resolve** | Mac / Windows / Linux | WAV / MP3 / MP4 |
 
-不需要是專業剪輯師。只要會匯入影片、在時間軸裁切、匯出 XML 和影片就夠了。
+不需要是專業剪輯師。只要會匯入影片、在時間軸裁切、匯出音訊和影片就夠了。
+
+### 5. 本機轉錄（Apple Silicon Mac）
+
+內建後端需要 Apple Silicon macOS；Intel Mac、Windows 與 Linux 需要其他後端。使用 Homebrew 安裝工具：
+
+```bash
+brew install uv ffmpeg
+uv --version
+ffmpeg -version
+ffprobe -version
+```
+
+`uv run --script` 自動管理 Python 3.11 與固定版本的 `mlx-whisper`，無需另行執行 `uv tool install mlx-whisper`。首次執行下載模型，音訊處理留在本機。
 
 ---
 
@@ -112,6 +125,8 @@ mkdir my-video
 
 ## 工作流總覽
 
+README 步驟包含手動剪輯與匯出；技能編號標示六個自動化技能。因此，README 第 4 步使用 `ytclip-3-audio-to-srt`。
+
 ```
 YouTube 網址
     │
@@ -136,14 +151,14 @@ YouTube 網址
 ┌───────────────────────────────┐
 │ 第 3 步：剪輯精華               │  你的剪輯軟體
 └───────────────────────────────┘
-    │  剪輯完成的時間軸 + XML 匯出
+    │  剪輯後的音訊匯出
     ▼
 ─── 第二階段：翻譯字幕 & 輸出繁中版 ─────────────
     │
 ┌───────────────────────────────┐
-│ 第 4 步：重新對齊字幕            │  ytclip-3-remap-srt
+│ 第 4 步：音訊轉字幕              │  ytclip-3-audio-to-srt (AI)
 └───────────────────────────────┘
-    │  重新對齊的 SRT
+    │  辨識產生的 SRT
     ▼
 ┌───────────────────────────────┐
 │ 第 5 步：翻譯 EN → zh-TW       │  ytclip-4-translate-en-to-zhtw (AI)
@@ -208,7 +223,7 @@ yt-dlp --download-sections "*01:00:00-02:30:00" \
 
 ### 第 1 步 — 下載逐字稿
 
-這一步會把 YouTube 上的字幕抓成 SRT，作為後續找片段、對字幕和翻譯的基礎。**字幕的時間範圍必須和影片一致，匯入剪輯軟體後才會同步。**
+這一步會把 YouTube 上的字幕抓成 SRT，用來找亮點與剪輯。第 4 步會從剪輯後的音訊重新產生字幕供翻譯使用。**字幕的時間範圍必須和影片一致，匯入剪輯軟體後才會同步。**
 
 **A) 下載整場逐字稿**（搭配整場直播影片）：
 
@@ -318,72 +333,49 @@ my-video/
 
 > **先不要加字幕** — 等第二階段把字幕翻譯好再處理。
 
-#### 匯出專案 XML
+#### 匯出剪輯後的音訊
 
-把時間軸匯出成 XML 檔案，這樣下一步才能讀取你的剪輯結果。
-
-| 軟體 | XML 匯出方式 |
-|------|--------------|
-| **Premiere Pro** | 檔案 > 匯出 > Final Cut Pro XML |
-| **Final Cut Pro** | 檔案 > 輸出 XML |
-| **DaVinci Resolve** | 檔案 > 匯出 > 時間軸 > FCP 7 XML（或 FCPXML） |
-
-存檔為 `my-video/export.xml`。
-
-現在你的資料夾長這樣：
-```
-my-video/
-  raw-video.mp4
-  transcript-en.srt
-  chunks.json
-  content-map.md
-  export.xml                 ← 你的剪輯決策
-```
+將完整剪輯時間軸匯出為 `my-video/edited-audio.wav`（也支援 MP3 或剪輯後的 MP4）。從時間軸零點開始，保留開頭靜音與中間空白，讓字幕時間戳符合成品。不再需要匯出 XML。
 
 ---
 
 ## 第二階段：翻譯字幕 & 輸出繁中版
 
-### 第 4 步 — 把字幕對齊到剪輯時間軸
+### 第 4 步 — 本機音訊轉字幕 (AI)
 
-原始 SRT 的時間戳還是對應整場直播。這一步會把字幕重新對齊到你剪好的精華時間軸。
-
-#### 4a. 解析 XML 成片段清單
+使用 `ytclip-3-audio-to-srt`，直接從剪輯後的音訊產生原語言字幕。內建後端使用 Apple Silicon macOS 的 MLX Whisper large-v3-turbo。先安裝 `uv` 和 FFmpeg；首次執行會下載 Python 相依套件與模型，轉錄在本機完成。
 
 ```bash
-bun ytclip-3-remap-srt/scripts/parse_cuts.ts \
-  my-video/export.xml \
-  --track 0 \
-  -o my-video/clip_manifest.json
+uv run --script ytclip-3-audio-to-srt/scripts/transcribe.py \
+  my-video/edited-audio.wav --language en \
+  -o my-video/edited-en.srt
 ```
 
-> **注意：** `--track 0` 代表第一條影片軌。如果你的片段在其他軌道上，請改成對應的編號。
+也可以請 AI 代理執行：
 
-#### 4b. 重新對齊 SRT
+> Use ytclip-3-audio-to-srt. 將 `my-video/edited-audio.wav` 轉錄為英文字幕，儲存為 `my-video/edited-en.srt`。
+
+腳本同時輸出 `edited-en.report.json`，包含原始辨識片段與待檢查警告，且不會覆寫既有檔案。遇到重複或時間戳異常時，可加 `--chunk-seconds 30` 並使用新檔名重試一次。切塊優先選擇低音量停頓並還原原始時間偏移；這不是語音偵測。翻譯前檢查空白、專有名詞與時間軸。其他平台需要使用不同的本機後端。
+
+#### 使用較小切塊重試
+
+出現重複或時間戳異常時，使用新檔名重試一次：
 
 ```bash
-bun ytclip-3-remap-srt/scripts/remap_srt.ts \
-  my-video/transcript-en.srt \
-  my-video/clip_manifest.json \
-  -o my-video/transcript-en-remapped.srt \
-  --gap 50
+uv run --script ytclip-3-audio-to-srt/scripts/transcribe.py \
+  my-video/edited-audio.wav --language en --chunk-seconds 30 \
+  -o my-video/edited-en.chunked.srt
 ```
 
-這會只保留實際出現在成品裡的字幕行，並把時間戳調整成符合你剪輯順序的版本。
+輸出為 `edited-en.chunked.srt` 與 `edited-en.chunked.report.json`。預設 `--chunk-seconds 0` 處理完整檔案，非零值至少為 10 秒。切塊優先選擇停頓，但仍可能切斷語音，需要對照音訊檢查邊界。
 
-現在你的資料夾長這樣：
-```
-my-video/
-  ...（前面的檔案）
-  clip_manifest.json         ← 解析後的片段時間資料
-  transcript-en-remapped.srt ← 對齊剪輯時間軸的字幕
-```
+將 `--language` 設為口語語言，或省略以自動偵測一次。第 5 步處理英文，其他語言需要對應翻譯流程。翻譯前聽查開頭、中間、結尾與警告區間；SRT 格式有效不代表辨識準確。若選用切塊結果，第 5 步改用該 SRT 作為輸入。
 
 ### 第 5 步 — 翻譯字幕 EN → zh-TW（AI）
 
-把對齊好的英文字幕翻成繁體中文（台灣）。打開 Claude Code（或你慣用的 AI 代理）輸入：
+把檢查過的英文轉錄字幕翻成繁體中文（台灣）。打開 Claude Code（或你慣用的 AI 代理）輸入：
 
-> Use ytclip-4-translate-en-to-zhtw skill. 把 `my-video/transcript-en-remapped.srt` 翻譯成繁體中文（台灣），翻譯時請遵循 `ytclip-4-translate-en-to-zhtw/references/zh-tw-localization.md` 中的在地化規則。存檔為 `my-video/transcript-zhtw-remapped.srt`。
+> Use ytclip-4-translate-en-to-zhtw skill. 把 `my-video/edited-en.srt` 翻譯成繁體中文（台灣），翻譯時請遵循 `ytclip-4-translate-en-to-zhtw/references/zh-tw-localization.md` 中的在地化規則。存檔為 `my-video/edited-zhtw.srt`。
 
 AI 會直接讀取你的 SRT 檔案進行翻譯，附帶在地化規則處理台灣圈內用語、梗和社群語感。
 
@@ -399,7 +391,7 @@ AI 會直接讀取你的 SRT 檔案進行翻譯，附帶在地化規則處理台
 
 逐行播放並檢查：
 
-1. **時間軸微調** — 自動對齊後部分字幕可能差個幾格，手動拉齊
+1. **時間軸微調** — 對照音訊修正自動轉錄的起訖時間與斷句
 2. **用字修潤** — AI 翻譯不一定完全合你的語感，這裡是最後修正的機會
 3. **確認不擋畫面** — 字幕位置不要遮到重要畫面元素
 
@@ -461,13 +453,17 @@ bun ytclip-6-convert-tc-to-sc/scripts/convert.ts \
 
 > **注意：** 這只是字元對應轉換，不會調整用語或語感。如果需要大陸在地化（例如把「影片」改成「视频」），需要另外處理。
 
+完整技能會接著進行用語在地化，保留字幕編號與時間戳：
+
+> Use ytclip-6-convert-tc-to-sc. 將 `my-video/transcript-zhtw-final.srt` 轉為簡中並完成大陸用語在地化，存為 `my-video/transcript-zhcn-final.srt`。
+
 ### 第 10 步 — 檢查簡中字幕並輸出簡中版
 
 把簡中 SRT 匯入剪輯軟體，快速過一遍確認轉換結果沒問題。
 
 #### 匯入簡中 SRT
 
-用第 7 步同樣的匯入方式，把 `my-video/transcript-zhcn-final.srt` 匯入剪輯軟體。記得先移除或停用繁中字幕軌。
+用第 6 步同樣的匯入方式，把 `my-video/transcript-zhcn-final.srt` 匯入剪輯軟體。記得先移除或停用繁中字幕軌。
 
 #### 快速檢查
 
@@ -491,10 +487,10 @@ my-video/
   transcript-en.srt                字幕原稿（完整直播時間軸）
   chunks.json                      給 AI 評估的逐字稿區塊
   content-map.md                   內容地圖（KEEP / TRIM / CUT）
-  export.xml                       剪輯時間軸匯出
-  clip_manifest.json               解析後的剪輯時間資料
-  transcript-en-remapped.srt       對齊成品的英文字幕
-  transcript-zhtw-remapped.srt     AI 翻譯後的繁體中文字幕
+  edited-audio.wav                剪輯時間軸匯出的音訊
+  edited-en.report.json           辨識詳情與待檢查警告
+  edited-en.srt                   對齊成品的英文字幕
+  edited-zhtw.srt                 AI 翻譯後的繁體中文字幕
   transcript-zhtw-final.srt        最終繁中字幕（手動調整 + AI 校對後）
   transcript-zhcn-final.srt        簡體中文字幕（繁→簡轉換）
 ```
@@ -509,16 +505,14 @@ ytclip/
 │   ├── scripts/clip_candidates.ts
 │   └── references/
 │       └── highlight-evaluation-rubric.md
-├── ytclip-3-remap-srt/                  把字幕重新對齊到剪好的片段
-│   └── scripts/
-│       ├── parse_cuts.ts
-│       └── remap_srt.ts
+├── ytclip-3-audio-to-srt/               剪輯後音訊轉 SRT
+│   └── scripts/transcribe.py
 ├── ytclip-4-translate-en-to-zhtw/       AI 翻譯英文字幕 → 繁體中文（台灣）
 │   ├── SKILL.md
 │   └── references/zh-tw-localization.md
 ├── ytclip-5-proofread-zhtw/             AI 校對繁中字幕，抓錯字
 │   └── SKILL.md
-├── ytclip-6-convert-tc-to-sc/           繁中轉簡中（純字元轉換）
+├── ytclip-6-convert-tc-to-sc/           繁中轉簡中 + 用語在地化
 │   └── scripts/convert.ts
 └── readme-translations/                 其他語言的 README
 ```

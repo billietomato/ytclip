@@ -1,6 +1,6 @@
 ---
 name: ytclip-6-convert-tc-to-sc
-description: "Step 7 of ytclip pipeline: convert a zh-TW SRT into mainland zh-CN. First run script-based Traditional-to-Simplified conversion, then localize terms, slang, gaming, and streaming language for mainland usage. Input: zh-TW SRT. Output: zh-CN SRT."
+description: "Skill 6 of ytclip (README Step 9): convert a zh-TW SRT into mainland zh-CN. First run script-based Traditional-to-Simplified conversion, then localize terms, slang, gaming, and streaming language for mainland usage. Input: zh-TW SRT. Output: zh-CN SRT."
 ---
 
 # ytclip-6-convert-tc-to-sc
@@ -19,7 +19,7 @@ Do not stop after raw character conversion. The final output should read like na
 
 ## Input
 
-- An SRT subtitle file in Traditional Chinese, typically the zh-TW file produced by `ytclip-4-translate-en-to-zhtw`
+- An SRT subtitle file in Traditional Chinese. In the README workflow, use `transcript-zhtw-final.srt` after manual review and corrections from `ytclip-5-proofread-zhtw`, rather than the initial translation draft.
 
 ## Output
 
